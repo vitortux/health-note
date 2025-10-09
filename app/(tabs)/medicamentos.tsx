@@ -14,6 +14,8 @@ export default function Index() {
   const [medicamentoId, setMedicamentoId] = useState("");
   const [nome, setNome] = useState("");
   const [dosagem, setDosagem] = useState("");
+  const [diaSemana, setDiaSemana] = useState("");
+  const [hora, setHora] = useState("");
   const [medicamentos, setMedicamentos] = useState<Medicamento[]>([]);
   const medicamentosTable = useMedicamentosTable();
 
@@ -25,20 +27,28 @@ export default function Index() {
 
   async function handleSubmit() {
     if (medicamentoId) {
-      update();
+      await update();
     } else {
-      insert();
+      await insert();
     }
 
     setMedicamentoId("");
     setNome("");
     setDosagem("");
+    setDiaSemana("");
+    setHora("");
 
     await select();
   }
 
   async function insert() {
-    const response = await medicamentosTable.insert({ nome, dosagem });
+    const response = await medicamentosTable.insert({
+      nome,
+      dosagem,
+      dia_semana: Number(diaSemana),
+      hora,
+    });
+
     Alert.alert("Medicamento cadastrado com o ID: " + response.insertedRowId);
 
     // Se for necessário fazer alguma conversão de tipo (como string para number), dá pra por um try-catch aqui
@@ -49,6 +59,8 @@ export default function Index() {
       medicamento_id: Number(medicamentoId),
       nome,
       dosagem,
+      dia_semana: Number(diaSemana),
+      hora,
     });
 
     // Se for necessário fazer alguma conversão de tipo (como string para number), dá pra por um try-catch aqui
@@ -91,6 +103,15 @@ export default function Index() {
         value={dosagem}
         className="w-full px-4 py-3 rounded-xl border border-gray-300 bg-white text-gray-800"
       />
+
+      <Input
+        placeholder="Dia da semana (0 = Domingo, 1 = Segunda...)"
+        keyboardType="numeric"
+        value={diaSemana}
+        onChangeText={setDiaSemana}
+      />
+
+      <Input placeholder="Hora (HH:MM)" value={hora} onChangeText={setHora} />
 
       <Pressable
         onPress={handleSubmit}
