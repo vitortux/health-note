@@ -9,7 +9,7 @@ import { router } from "expo-router";
 import { useEffect, useState } from "react";
 import { Alert, FlatList, Pressable, Text, View } from "react-native";
 
-export default function Index() {
+export default function Medicamentos() {
   const [search, setSearch] = useState("");
   const [medicamentoId, setMedicamentoId] = useState("");
   const [nome, setNome] = useState("");
