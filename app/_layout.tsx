@@ -11,7 +11,11 @@ export default function RootLayout() {
       <Stack>
         <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
         <Stack.Screen name="+not-found" options={{ headerShown: false }} />
-        <Stack.Screen name="/details/[medicamento_id]" />
+        <Stack.Screen
+          name="cadastrar-medicamento/[medicamento_id]"
+          options={{ headerShown: false }}
+        />
+        <Stack.Screen name="details/[medicamento_id]" />
       </Stack>
     </SQLiteProvider>
   );
