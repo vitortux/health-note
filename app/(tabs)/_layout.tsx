@@ -7,7 +7,20 @@ export default function TabsLayout() {
       <Tabs.Screen
         name="index"
         options={{
-          headerTitle: "Home",
+          headerShown: false,
+          tabBarIcon: ({ focused, color }) => (
+            <Ionicons
+              name={focused ? "home-sharp" : "home-outline"}
+              color={color}
+              size={20}
+            />
+          ),
+        }}
+      />
+      <Tabs.Screen
+        name="notifee"
+        options={{
+          headerTitle: "Notifee",
           tabBarIcon: ({ focused, color }) => (
             <Ionicons
               name={focused ? "home-sharp" : "home-outline"}

@@ -1,6 +1,6 @@
 import { TextInput, TextInputProps } from "react-native";
 
-export function Input({ ...rest }: TextInputProps) {
+export function Input({ ...rest }: Readonly<TextInputProps>) {
   return <TextInput style={{ backgroundColor: "white" }} {...rest} />;
 }
 

@@ -1,15 +1,21 @@
 import { useSQLiteContext } from "expo-sqlite";
+import { useHorariosTable } from "./useHorariosTable";
 
 export type Medicamento = {
   medicamento_id: number;
   nome: string;
   dosagem: string;
+  dia_semana: number;
+  hora: string;
 };
 
 export function useMedicamentosTable() {
   const database = useSQLiteContext();
+  const horariosTable = useHorariosTable();
 
   async function insert(data: Omit<Medicamento, "medicamento_id">) {
+    console.log(data);
+
     const statement = await database.prepareAsync(
       "INSERT INTO medicamentos (nome, dosagem) VALUES ($nome, $dosagem)"
     );
@@ -20,7 +26,14 @@ export function useMedicamentosTable() {
         $dosagem: data.dosagem,
       });
 
-      const insertedRowId = result.lastInsertRowId.toLocaleString();
+      const insertedRowId = result.lastInsertRowId;
+
+      await horariosTable.insert({
+        medicamento_id: insertedRowId,
+        dia_semana: data.dia_semana,
+        hora: data.hora,
+      });
+
       return { insertedRowId };
     } catch (error) {
       console.log("Erro ao inserir medicamento:", error);
@@ -53,7 +66,20 @@ export function useMedicamentosTable() {
 
   async function select(nome: string) {
     try {
-      const query = "SELECT * FROM medicamentos WHERE nome LIKE ?";
+      const query = `
+      SELECT 
+        m.medicamento_id,
+        m.nome,
+        m.dosagem,
+        h.dia_semana,
+        h.hora
+      FROM medicamentos m
+      LEFT JOIN medicamento_horarios h
+        ON m.medicamento_id = h.medicamento_id
+      WHERE m.nome LIKE ?
+      ORDER BY m.nome ASC
+    `;
+
       const response = await database.getAllAsync<Medicamento>(query, [
         `%${nome}%`,
       ]);

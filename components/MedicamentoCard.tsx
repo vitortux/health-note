@@ -4,6 +4,8 @@ type Props = PressableProps & {
   data: {
     nome: string;
     dosagem: string;
+    dia_semana: number;
+    hora: string;
   };
   onDelete: () => void;
   onOpen: () => void;
@@ -22,6 +24,13 @@ export function MedicamentoCard({ data, onDelete, onOpen, ...rest }: Props) {
       <Text className="text-md text-gray-500 mb-4">
         Dosagem:{" "}
         <Text className="font-semibold text-gray-700">{data.dosagem}</Text>
+      </Text>
+      <Text className="text-md text-gray-500 mb-4">
+        Dia semana:{" "}
+        <Text className="font-semibold text-gray-700">{data.dia_semana}</Text>
+      </Text>
+      <Text className="text-md text-gray-500 mb-4">
+        Hora: <Text className="font-semibold text-gray-700">{data.hora}</Text>
       </Text>
 
       {/* Botões */}
