@@ -3,44 +3,36 @@ import { Tabs } from "expo-router";
 
 export default function TabsLayout() {
   return (
-    <Tabs screenOptions={{ tabBarActiveTintColor: "gray" }}>
+    <Tabs
+      screenOptions={{
+        tabBarActiveTintColor: "#0ea5e9", // sky-500
+        tabBarInactiveTintColor: "#6b7280", // gray-500
+      }}
+    >
       <Tabs.Screen
         name="index"
         options={{
           headerShown: false,
+          tabBarLabel: "Home",
           tabBarIcon: ({ focused, color }) => (
             <Ionicons
               name={focused ? "home-sharp" : "home-outline"}
-              color={color}
               size={20}
+              color={color}
             />
           ),
         }}
       />
       <Tabs.Screen
-        name="notifee"
+        name="notificacoes"
         options={{
-          headerTitle: "Notifee",
+          headerShown: false,
+          tabBarLabel: "Notificações",
           tabBarIcon: ({ focused, color }) => (
             <Ionicons
-              name={focused ? "home-sharp" : "home-outline"}
-              color={color}
+              name={focused ? "notifications" : "notifications-outline"}
               size={20}
-            />
-          ),
-        }}
-      />
-      <Tabs.Screen
-        name="medicamentos"
-        options={{
-          headerTitle: "Medicamentos",
-          tabBarIcon: ({ focused, color }) => (
-            <Ionicons
-              name={
-                focused ? "information-circle" : "information-circle-outline"
-              }
               color={color}
-              size={20}
             />
           ),
         }}

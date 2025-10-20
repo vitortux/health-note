@@ -20,12 +20,14 @@ const hours = Array.from({ length: 24 }, (_, i) => ({ value: i }));
 const minutes = Array.from({ length: 60 }, (_, i) => ({ value: i }));
 
 interface DateTimePickerProps {
-  readonly onChange?: (dias: string[], hora: number, minuto: number) => void;
+  readonly onChange?: (dias: number[], hora: number, minuto: number) => void;
 }
 
+const semana = ["dom", "seg", "ter", "qua", "qui", "sex", "sab"];
+
 export default function DateTimePicker({ onChange }: DateTimePickerProps) {
-  const semana = ["dom", "seg", "ter", "qua", "qui", "sex", "sab"];
-  const [diasSelecionados, setDiasSelecionados] = useState<string[]>([]);
+  const [diasSelecionados, setDiasSelecionados] = useState<number[]>([]);
+
   const [value, setValue] = useState({ value1: 0, value2: 0 });
 
   const pickerControl = usePickerControl<ControlPickersMap>();
@@ -43,21 +45,27 @@ export default function DateTimePicker({ onChange }: DateTimePickerProps) {
     // opcional: lógica de preview
   });
 
-  function toggleDia(dia: string) {
-    const novosDias = diasSelecionados.includes(dia)
-      ? diasSelecionados.filter((d) => d !== dia)
-      : [...diasSelecionados, dia];
+  function toggleDia(index: number) {
+    const novosDias = diasSelecionados.includes(index)
+      ? diasSelecionados.filter((d) => d !== index)
+      : [...diasSelecionados, index];
     setDiasSelecionados(novosDias);
     onChange?.(novosDias, value.value1, value.value2);
   }
 
   const descricao = useMemo(() => {
     if (diasSelecionados.length === 0) return "Selecione dias e horário";
+
     const diasFormatados = diasSelecionados
-      .map((d) => d[0].toUpperCase() + d.slice(1))
+      .map((d) => {
+        const diaNome = semana[d]; // pega o nome do dia pelo índice
+        return diaNome[0].toUpperCase() + diaNome.slice(1);
+      })
       .join(", ");
+
     const hora = String(value.value1).padStart(2, "0");
     const minuto = String(value.value2).padStart(2, "0");
+
     return `Toda ${diasFormatados} às ${hora}:${minuto}`;
   }, [diasSelecionados, value]);
 
@@ -94,15 +102,13 @@ export default function DateTimePicker({ onChange }: DateTimePickerProps) {
 
       {/* Dias da semana */}
       <View className="flex-row justify-between mb-6">
-        {semana.map((dia) => {
-          const ativo = diasSelecionados.includes(dia);
+        {semana.map((dia, index) => {
+          const ativo = diasSelecionados.includes(index);
           return (
             <TouchableOpacity
               key={dia}
-              className={`w-12 h-12 rounded-full items-center justify-center ${
-                ativo ? "bg-sky-500" : "bg-gray-200"
-              }`}
-              onPress={() => toggleDia(dia)}
+              className={`w-12 h-12 rounded-full items-center justify-center ${ativo ? "bg-sky-500" : "bg-gray-200"}`}
+              onPress={() => toggleDia(index)}
             >
               <Text
                 className={`text-base font-bold ${ativo ? "text-white" : "text-gray-700"}`}

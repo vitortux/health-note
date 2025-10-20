@@ -1,8 +1,13 @@
 import DateTimePicker from "@/components/DateTimePicker";
 import DosagemBottomSheet from "@/components/DosagemBottomSheet";
+import { useMedicamentosTable } from "@/hooks/useMedicamentosTable";
+import { useNotificacoesTable } from "@/hooks/useNotificacoesTable";
+import { scheduleNotification } from "@/utils/notifee";
 import { MaterialIcons } from "@expo/vector-icons";
 import BottomSheet from "@gorhom/bottom-sheet";
+import * as FileSystem from "expo-file-system/legacy";
 import * as ImagePicker from "expo-image-picker";
+import { router } from "expo-router";
 import { useRef, useState } from "react";
 import { Text, TextInput, TouchableOpacity, View } from "react-native";
 import { GestureHandlerRootView } from "react-native-gesture-handler";
@@ -10,10 +15,18 @@ import { SafeAreaView } from "react-native-safe-area-context";
 
 export default function CadastrarMedicamento() {
   const bottomSheetRef = useRef<BottomSheet>(null);
+  const handleOpenPress = () => bottomSheetRef.current?.expand();
+
   const [selectedDose, setSelectedDose] = useState<string>("unidade");
   const [selectedImage, setSelectedImage] = useState<string | null>(null);
+  const [nomeMedicamento, setNomeMedicamento] = useState("");
+  const [dosagem, setDosagem] = useState("");
+  const [diasSelecionados, setDiasSelecionados] = useState<number[]>([]);
+  const [hora, setHora] = useState(0);
+  const [minuto, setMinuto] = useState(0);
 
-  const handleOpenPress = () => bottomSheetRef.current?.expand();
+  const medicamentosTable = useMedicamentosTable();
+  const notificacoesTable = useNotificacoesTable();
 
   const formatDoseName = (dose: string) => {
     return dose.toLowerCase() === "mg" || dose.toLowerCase() === "ml"
@@ -22,18 +35,77 @@ export default function CadastrarMedicamento() {
   };
 
   const pickImage = async () => {
-    let result = await ImagePicker.launchImageLibraryAsync({
-      allowsEditing: true,
-      quality: 1,
-    });
+    try {
+      const result = await ImagePicker.launchImageLibraryAsync({
+        allowsEditing: true,
+        quality: 1,
+      });
 
-    if (result.canceled) {
-      console.log("Seleção de imagem cancelada");
-    } else {
-      setSelectedImage(result.assets[0].uri);
-      console.log(result);
+      if (result.canceled) {
+        console.log("Seleção de imagem cancelada");
+        return;
+      }
+
+      const uri = result.assets[0].uri;
+      const fileName = uri.split("/").pop();
+      const dest = FileSystem.documentDirectory + fileName;
+
+      // Primeiro copia a imagem
+      await FileSystem.copyAsync({ from: uri, to: dest });
+
+      // Só então atualiza o estado
+      setSelectedImage(dest);
+      console.log("SelectedImage: " + selectedImage);
+    } catch (error) {
+      console.error("Erro ao copiar imagem:", error);
     }
   };
+
+  async function handleSubmit() {
+    try {
+      const id_medicamento = await medicamentosTable.insert({
+        nome_medicamento: nomeMedicamento,
+        dosagem: Number(dosagem),
+        medida: selectedDose,
+        imagem_uri: selectedImage!,
+      });
+
+      for (const diaSemana of diasSelecionados) {
+        const now = new Date();
+        const target = new Date();
+        target.setHours(hora, minuto, 0, 0);
+
+        const diff = (diaSemana + 7 - now.getDay()) % 7;
+        if (diff === 0 && target <= now) {
+          target.setDate(target.getDate() + 7);
+        } else {
+          target.setDate(target.getDate() + diff);
+        }
+
+        const id_notifee = await scheduleNotification({
+          title: `Hora do medicamento: ${nomeMedicamento}`,
+          body: `Tomar ${dosagem} ${selectedDose}`,
+          timestamp: target.getTime(),
+        });
+
+        await notificacoesTable.insert({
+          id_notifee,
+          id_medicamento: Number(id_medicamento),
+          hora: `${hora.toString().padStart(2, "0")}:${minuto
+            .toString()
+            .padStart(2, "0")}`,
+          dia: diaSemana,
+        });
+      }
+
+      alert("Medicamento e notificações salvos!");
+    } catch (e) {
+      console.error(e);
+      alert("Erro ao salvar medicamento/notificação");
+    } finally {
+      router.back();
+    }
+  }
 
   return (
     <GestureHandlerRootView className="flex-1">
@@ -41,13 +113,19 @@ export default function CadastrarMedicamento() {
         <View className="flex-1">
           {/* Seletor de horário */}
           <DateTimePicker
-            onChange={(dias, hora, minuto) => console.log(dias, hora, minuto)}
+            onChange={(dias, h, m) => {
+              setDiasSelecionados(dias);
+              setHora(h);
+              setMinuto(m);
+            }}
           />
 
           {/* Input do nome do medicamento */}
           <TextInput
             placeholder="Nome do medicamento"
             className="border-b border-gray-300 pb-3 text-gray-800 text-xl h-16"
+            value={nomeMedicamento}
+            onChangeText={setNomeMedicamento}
           />
 
           {/* Input + seletor de dosagem */}
@@ -56,6 +134,8 @@ export default function CadastrarMedicamento() {
             <TextInput
               placeholder="Dosagem"
               keyboardType="numeric"
+              value={dosagem}
+              onChangeText={setDosagem}
               className="flex-1 border-b border-gray-300 mr-4 pb-3 text-gray-800 text-xl h-16"
             />
 
@@ -85,13 +165,19 @@ export default function CadastrarMedicamento() {
 
         {/* Botões de ação */}
         <View className="flex-row justify-between items-center py-4 px-6 border-t border-gray-200">
-          <TouchableOpacity className="flex-1 bg-gray-200 py-3 rounded-2xl mr-2">
+          <TouchableOpacity
+            className="flex-1 bg-gray-200 py-3 rounded-2xl mr-2"
+            onPress={() => router.back()}
+          >
             <Text className="text-center text-gray-700 font-semibold text-lg">
               Cancelar
             </Text>
           </TouchableOpacity>
 
-          <TouchableOpacity className="flex-1 bg-sky-500 py-3 rounded-2xl ml-2">
+          <TouchableOpacity
+            className="flex-1 bg-sky-500 py-3 rounded-2xl ml-2"
+            onPress={handleSubmit}
+          >
             <Text className="text-center text-white font-semibold text-lg">
               Salvar
             </Text>

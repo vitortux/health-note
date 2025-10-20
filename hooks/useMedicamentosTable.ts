@@ -1,40 +1,30 @@
 import { useSQLiteContext } from "expo-sqlite";
-import { useHorariosTable } from "./useHorariosTable";
 
 export type Medicamento = {
-  medicamento_id: number;
-  nome: string;
-  dosagem: string;
-  dia_semana: number;
-  hora: string;
+  id_medicamento: number;
+  nome_medicamento: string;
+  dosagem: number;
+  medida: string;
+  imagem_uri: string;
 };
 
 export function useMedicamentosTable() {
   const database = useSQLiteContext();
-  const horariosTable = useHorariosTable();
 
-  async function insert(data: Omit<Medicamento, "medicamento_id">) {
-    console.log(data);
-
+  async function insert(data: Omit<Medicamento, "id_medicamento">) {
     const statement = await database.prepareAsync(
-      "INSERT INTO medicamentos (nome, dosagem) VALUES ($nome, $dosagem)"
+      "INSERT INTO medicamentos (nome_medicamento, dosagem, medida, imagem_uri) VALUES ($nome_medicamento, $dosagem, $medida, $imagem_uri)"
     );
 
     try {
       const result = await statement.executeAsync({
-        $nome: data.nome,
+        $nome_medicamento: data.nome_medicamento,
         $dosagem: data.dosagem,
+        $medida: data.medida,
+        $imagem_uri: data.imagem_uri,
       });
 
-      const insertedRowId = result.lastInsertRowId;
-
-      await horariosTable.insert({
-        medicamento_id: insertedRowId,
-        dia_semana: data.dia_semana,
-        hora: data.hora,
-      });
-
-      return { insertedRowId };
+      return result.lastInsertRowId;
     } catch (error) {
       console.log("Erro ao inserir medicamento:", error);
       throw error;
@@ -47,13 +37,13 @@ export function useMedicamentosTable() {
 
   async function update(data: Medicamento) {
     const statement = await database.prepareAsync(
-      "UPDATE medicamentos SET nome = $nome, dosagem = $dosagem WHERE medicamento_id = $medicamento_id"
+      "UPDATE medicamentos SET nome_medicamento = $nome_medicamento, dosagem = $dosagem WHERE id_medicamento = $id_medicamento"
     );
 
     try {
       await statement.executeAsync({
-        $medicamento_id: data.medicamento_id,
-        $nome: data.nome,
+        $id_medicamento: data.id_medicamento,
+        $nome_medicamento: data.nome_medicamento,
         $dosagem: data.dosagem,
       });
     } catch (error) {
@@ -64,24 +54,11 @@ export function useMedicamentosTable() {
     }
   }
 
-  async function select(nome: string) {
+  async function select(nome_medicamento: string) {
     try {
-      const query = `
-      SELECT 
-        m.medicamento_id,
-        m.nome,
-        m.dosagem,
-        h.dia_semana,
-        h.hora
-      FROM medicamentos m
-      LEFT JOIN medicamento_horarios h
-        ON m.medicamento_id = h.medicamento_id
-      WHERE m.nome LIKE ?
-      ORDER BY m.nome ASC
-    `;
-
+      const query = "SELECT * FROM medicamentos WHERE nome_medicamento LIKE ?";
       const response = await database.getAllAsync<Medicamento>(query, [
-        `%${nome}%`,
+        `%${nome_medicamento}%`,
       ]);
 
       return response;
@@ -93,10 +70,10 @@ export function useMedicamentosTable() {
     // Depois fazer uma versão separada para o select all e o select por parâmetro
   }
 
-  async function remove(medicamento_id: number) {
+  async function remove(id_medicamento: number) {
     try {
       await database.execAsync(
-        "DELETE FROM medicamentos WHERE medicamento_id = " + medicamento_id
+        "DELETE FROM medicamentos WHERE id_medicamento = " + id_medicamento
       );
     } catch (error) {
       console.log("Erro ao deletar medicamento:", error);
@@ -106,11 +83,11 @@ export function useMedicamentosTable() {
     // Delete é palavra reservada xD
   }
 
-  async function selectById(medicamento_id: number) {
+  async function selectById(id_medicamento: number) {
     try {
-      const query = "SELECT * FROM medicamentos WHERE medicamento_id = ?";
+      const query = "SELECT * FROM medicamentos WHERE id_medicamento = ?";
       const response = await database.getFirstAsync<Medicamento>(query, [
-        medicamento_id,
+        id_medicamento,
       ]);
       return response;
     } catch (error) {
