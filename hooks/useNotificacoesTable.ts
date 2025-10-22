@@ -33,6 +33,18 @@ export function useNotificacoesTable() {
     }
   }
 
+  async function deleteByMedicamentoId(id_medicamento: number) {
+    try {
+      await database.runAsync(
+        "DELETE FROM notificacoes WHERE id_medicamento = $id_medicamento",
+        { $id_medicamento: id_medicamento }
+      );
+    } catch (error) {
+      console.log("Erro ao deletar notificação:", error);
+      throw error;
+    }
+  }
+
   async function select(id_notifee: string) {
     try {
       const query = "SELECT * FROM notificacoes WHERE id_notifee LIKE ?";
@@ -113,5 +125,36 @@ export function useNotificacoesTable() {
     }
   }
 
-  return { insert, select, selectByDia, selectByDiaComRegistro };
+  async function deleteAll() {
+    try {
+      await database.execAsync("DELETE FROM notificacoes");
+    } catch (error) {
+      console.log("Erro ao deletar medicamento:", error);
+      throw error;
+    }
+  }
+
+  async function selectByMedicamentoId(id_medicamento: number) {
+    const query = `
+      SELECT 
+        id_notifee,
+        hora,
+        dia
+      FROM notificacoes
+      WHERE id_medicamento = ?
+      ORDER BY hora ASC;
+    `;
+
+    return await database.getAllAsync(query, [id_medicamento]);
+  }
+
+  return {
+    insert,
+    deleteByMedicamentoId,
+    select,
+    selectByDia,
+    selectByDiaComRegistro,
+    deleteAll,
+    selectByMedicamentoId,
+  };
 }

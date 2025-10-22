@@ -27,10 +27,24 @@ export default function TabsLayout() {
         name="notificacoes"
         options={{
           headerShown: false,
-          tabBarLabel: "Notificações",
+          tabBarLabel: "Hoje",
           tabBarIcon: ({ focused, color }) => (
             <Ionicons
-              name={focused ? "notifications" : "notifications-outline"}
+              name={focused ? "calendar" : "calendar-outline"}
+              size={20}
+              color={color}
+            />
+          ),
+        }}
+      />
+      <Tabs.Screen
+        name="debug"
+        options={{
+          headerShown: false,
+          tabBarLabel: "Debug",
+          tabBarIcon: ({ focused, color }) => (
+            <Ionicons
+              name={focused ? "code-slash" : "code-outline"}
               size={20}
               color={color}
             />

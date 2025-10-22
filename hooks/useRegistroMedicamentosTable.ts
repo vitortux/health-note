@@ -43,5 +43,14 @@ export function useRegistroMedicamentosTable() {
     }
   }
 
-  return { insert, selectAll };
+  async function deleteAll() {
+    try {
+      await database.execAsync("DELETE FROM registro_medicamentos");
+    } catch (error) {
+      console.log("Erro ao deletar medicamento:", error);
+      throw error;
+    }
+  }
+
+  return { insert, selectAll, deleteAll };
 }

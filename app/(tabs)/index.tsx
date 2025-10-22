@@ -1,40 +1,89 @@
 import MedicamentoAlarme from "@/components/MedicamentoAlarme";
+import {
+  MedicamentoComAlarme,
+  useMedicamentosTable,
+} from "@/hooks/useMedicamentosTable";
+import { getProximoMedicamento } from "@/utils/notifee";
 import { Feather } from "@expo/vector-icons";
-import { router } from "expo-router";
+import { router, useNavigation } from "expo-router";
+import { useEffect, useState } from "react";
 import { ScrollView, Text, TouchableOpacity, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 
+type Alarme = {
+  id: string;
+  id_medicamento: number;
+  horario: string;
+  dias: number[];
+  nomeMedicamento: string;
+  dosagem: number;
+  medida: string;
+  imagem?: string | null;
+};
+
 export default function Home() {
-  const alarmes = [
-    { id: "1", horario: "06:00", dias: ["dom", "seg", "ter"] },
-    { id: "2", horario: "08:00", dias: ["seg", "qua", "sex"] },
-    { id: "3", horario: "09:30", dias: ["ter", "qui"] },
-    { id: "4", horario: "12:00", dias: ["dom", "qua", "sex"] },
-    { id: "5", horario: "13:30", dias: ["seg", "ter", "qui"] },
-    { id: "6", horario: "15:00", dias: ["qua", "sex"] },
-    { id: "7", horario: "16:30", dias: ["dom", "seg"] },
-    { id: "8", horario: "18:00", dias: ["ter", "qua", "qui"] },
-    { id: "9", horario: "20:00", dias: ["sex", "sab"] },
-    {
-      id: "10",
-      horario: "22:00",
-      dias: ["dom", "seg", "ter", "qua", "qui", "sex"],
-    },
-  ];
+  const navigation = useNavigation();
+  const medicamentosTable = useMedicamentosTable();
+
+  const [alarmes, setAlarmes] = useState<Alarme[]>([]);
+  const [proximoMedicamento, setProximoMedicamento] = useState<any>();
+
+  useEffect(() => {
+    const carregarAlarmes = async () => {
+      try {
+        const result: MedicamentoComAlarme[] =
+          await medicamentosTable.selectWithAlarme();
+        const alarmesTransformados = result.map((row) => ({
+          id: row.id_medicamento + "_" + row.hora,
+          id_medicamento: row.id_medicamento,
+          horario: row.hora,
+          dias: row.dias.split(",").map(Number),
+          nomeMedicamento: row.nome_medicamento,
+          dosagem: row.dosagem,
+          medida: row.medida,
+          imagem: row.imagem_uri,
+        }));
+        setAlarmes(alarmesTransformados);
+        const proximo = await getProximoMedicamento();
+        setProximoMedicamento(proximo);
+      } catch (error) {
+        console.log("Erro ao carregar notificações:", error);
+      }
+    };
+
+    carregarAlarmes();
+
+    const unsubscribe = navigation.addListener("focus", carregarAlarmes);
+    return unsubscribe;
+  }, [navigation, medicamentosTable]);
 
   return (
     <SafeAreaView className="flex-1 px-4 bg-white">
-      {/* View de informações do próximo medicamento */}
+      {/* Próximo medicamento */}
       <View className="py-[84px] mb-6 justify-center items-center">
-        <Text className="text-gray-800 font-extrabold text-3xl text-center">
-          Medicamento em 2 dias
-        </Text>
-        <Text className="text-gray-600 text-lg text-center">
-          seg., 13 de out., 12:00
-        </Text>
+        {proximoMedicamento ? (
+          <>
+            <Text className="text-gray-800 font-extrabold text-3xl text-center">
+              {`"${proximoMedicamento.nome_medicamento}" ${
+                proximoMedicamento.diffDias === 0
+                  ? "hoje"
+                  : proximoMedicamento.diffDias === 1
+                    ? "amanhã"
+                    : `em ${proximoMedicamento.diffDias} dias`
+              }`}
+            </Text>
+            <Text className="text-gray-600 text-lg text-center">
+              {`previso p/ ${proximoMedicamento.data}, ${proximoMedicamento.hora}`}
+            </Text>
+          </>
+        ) : (
+          <Text className="text-gray-800 font-extrabold text-3xl text-center">
+            Nenhum medicamento agendado
+          </Text>
+        )}
       </View>
 
-      {/* View de botões no canto superior direito */}
+      {/* Botões */}
       <View className="flex-row justify-end mb-4">
         <TouchableOpacity
           className="bg-sky-500 p-3 rounded-full"
@@ -47,7 +96,7 @@ export default function Home() {
         </TouchableOpacity>
       </View>
 
-      {/* Lista de medicamentos */}
+      {/* Lista de alarmes */}
       <ScrollView
         className="mt-4"
         showsVerticalScrollIndicator={false}
@@ -58,6 +107,12 @@ export default function Home() {
             key={alarme.id}
             horario={alarme.horario}
             dias={alarme.dias}
+            nomeMedicamento={alarme.nomeMedicamento}
+            dosagem={alarme.dosagem}
+            medida={alarme.medida}
+            onPress={() =>
+              router.navigate(`/cadastrar-medicamento/${alarme.id_medicamento}`)
+            }
           />
         ))}
       </ScrollView>

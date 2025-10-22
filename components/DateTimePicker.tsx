@@ -6,7 +6,7 @@ import WheelPicker, {
   usePickerControl,
   withPickerControl,
 } from "@quidone/react-native-wheel-picker";
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { Text, TouchableOpacity, View } from "react-native";
 
 const ControlPicker = withPickerControl(WheelPicker);
@@ -21,14 +21,26 @@ const minutes = Array.from({ length: 60 }, (_, i) => ({ value: i }));
 
 interface DateTimePickerProps {
   readonly onChange?: (dias: number[], hora: number, minuto: number) => void;
+  readonly initialDias?: number[];
+  readonly initialHora?: number;
+  readonly initialMinuto?: number;
 }
 
 const semana = ["dom", "seg", "ter", "qua", "qui", "sex", "sab"];
 
-export default function DateTimePicker({ onChange }: DateTimePickerProps) {
-  const [diasSelecionados, setDiasSelecionados] = useState<number[]>([]);
+export default function DateTimePicker({
+  onChange,
+  initialDias = [],
+  initialHora = 0,
+  initialMinuto = 0,
+}: DateTimePickerProps) {
+  const [diasSelecionados, setDiasSelecionados] =
+    useState<number[]>(initialDias);
 
-  const [value, setValue] = useState({ value1: 0, value2: 0 });
+  const [value, setValue] = useState({
+    value1: initialHora,
+    value2: initialMinuto,
+  });
 
   const pickerControl = usePickerControl<ControlPickersMap>();
 
@@ -68,6 +80,18 @@ export default function DateTimePicker({ onChange }: DateTimePickerProps) {
 
     return `Toda ${diasFormatados} às ${hora}:${minuto}`;
   }, [diasSelecionados, value]);
+
+  useEffect(() => {
+    setDiasSelecionados(initialDias);
+  }, [initialDias]);
+
+  useEffect(() => {
+    setValue({ value1: initialHora, value2: initialMinuto });
+  }, [initialHora, initialMinuto]);
+
+  useEffect(() => {
+    onChange?.(diasSelecionados, value.value1, value.value2);
+  }, [diasSelecionados, value.value1, value.value2]);
 
   return (
     <View>

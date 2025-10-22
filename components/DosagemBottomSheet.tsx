@@ -20,7 +20,6 @@ const Dosagem = ({
   onPress?: () => void;
   selected?: boolean;
 }) => {
-  // deixa MG e ML sempre em caps
   const formatName =
     name.toLowerCase() === "mg" || name.toLowerCase() === "ml"
       ? name.toUpperCase()

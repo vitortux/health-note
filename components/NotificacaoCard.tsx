@@ -27,28 +27,25 @@ export default function NotificacaoCard({
   const status = getStatus();
 
   let bgColor;
-  if (status === "tomado") bgColor = "bg-green-500";
+  if (status === "tomado") bgColor = "bg-sky-500";
   else if (status === "atrasado") bgColor = "bg-red-500";
-  else bgColor = "bg-yellow-400";
+  else bgColor = "bg-sky-500";
 
   return (
-    <View className="bg-white p-4 rounded-xl shadow mb-4 flex-row justify-between items-center">
+    <View className="flex-row justify-between items-center py-6 px-4 rounded-3xl mb-4 bg-slate-50">
       <View className="flex-row items-center">
         {notificacao.imagem_uri && (
           <Image
             source={{ uri: notificacao.imagem_uri }}
-            className="w-16 h-16 rounded-xl mr-3"
+            className="w-16 h-16 rounded-xl mr-4"
           />
         )}
         <View>
-          <Text className="text-lg font-bold">
+          <Text className="text-gray-800 font-semibold text-4xl">
             {notificacao.nome_medicamento}
           </Text>
-          <Text className="text-gray-600">
-            {notificacao.dosagem} {notificacao.medida}
-          </Text>
-          <Text className="text-gray-400 text-sm">
-            Hora: {notificacao.hora}
+          <Text className="text-gray-700 text-lg mt-1 font-medium">
+            {notificacao.dosagem} {notificacao.medida}, às {notificacao.hora}
           </Text>
         </View>
       </View>

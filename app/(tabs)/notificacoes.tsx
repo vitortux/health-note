@@ -6,7 +6,7 @@ import {
 import { useRegistroMedicamentosTable } from "@/hooks/useRegistroMedicamentosTable";
 import { useNavigation } from "expo-router";
 import { useEffect, useState } from "react";
-import { Button, ScrollView } from "react-native";
+import { ScrollView, Text, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 
 export type NotificacaoComRegistro = Notificacao & {
@@ -48,15 +48,6 @@ export default function Notificacoes() {
     }
   }
 
-  async function debugRegistros() {
-    try {
-      const registros = await registroTable.selectAll();
-      console.log("Registros de medicamentos:", registros);
-    } catch (error) {
-      console.log("Erro ao buscar registros de medicamentos:", error);
-    }
-  }
-
   useEffect(() => {
     const unsubscribe = navigation.addListener("focus", async () => {
       const agora = new Date();
@@ -69,6 +60,7 @@ export default function Notificacoes() {
           dataHoje
         );
         setNotificacoes(result);
+        console.log("Notificações carregadas:", result);
       } catch (error) {
         console.log("Erro ao carregar notificações:", error);
       }
@@ -78,8 +70,16 @@ export default function Notificacoes() {
   }, [navigation, notificacoesTable]);
 
   return (
-    <SafeAreaView>
-      <Button title="Debug registros" onPress={debugRegistros} />
+    <SafeAreaView className="flex-1 px-4 bg-white">
+      <View className="py-[84px] mb-6 justify-center items-center">
+        <Text className="text-gray-800 font-extrabold text-3xl text-center">
+          Medicamentos no dia de hoje
+        </Text>
+        <Text className="text-gray-600 text-lg text-center mt-2">
+          Confira seus horários e doses
+        </Text>
+      </View>
+
       <ScrollView>
         {notificacoes.map((notificacao) => (
           <NotificacaoCard

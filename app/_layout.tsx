@@ -15,7 +15,6 @@ export default function RootLayout() {
           name="cadastrar-medicamento/[medicamento_id]"
           options={{ headerShown: false }}
         />
-        <Stack.Screen name="details/[medicamento_id]" />
       </Stack>
     </SQLiteProvider>
   );

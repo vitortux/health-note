@@ -19,7 +19,7 @@ export async function initialize(database: SQLiteDatabase) {
       id_medicamento INTEGER NOT NULL,
       hora TEXT,
       dia INT,
-      FOREIGN KEY(id_medicamento) REFERENCES medicamentos(id_medicamento)
+      FOREIGN KEY(id_medicamento) REFERENCES medicamentos(id_medicamento) ON DELETE CASCADE
     );
 
     CREATE TABLE IF NOT EXISTS registro_medicamentos (
@@ -28,7 +28,7 @@ export async function initialize(database: SQLiteDatabase) {
       data TEXT NOT NULL,
       tomado INTEGER NOT NULL,
       UNIQUE(id_notifee, data),
-      FOREIGN KEY(id_notifee) REFERENCES notificacoes(id_notifee)
+      FOREIGN KEY(id_notifee) REFERENCES notificacoes(id_notifee) ON DELETE CASCADE
     );
   `);
 }

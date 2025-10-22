@@ -2,13 +2,13 @@ import DateTimePicker from "@/components/DateTimePicker";
 import DosagemBottomSheet from "@/components/DosagemBottomSheet";
 import { useMedicamentosTable } from "@/hooks/useMedicamentosTable";
 import { useNotificacoesTable } from "@/hooks/useNotificacoesTable";
-import { scheduleNotification } from "@/utils/notifee";
+import { cancelNotification, scheduleNotification } from "@/utils/notifee";
 import { MaterialIcons } from "@expo/vector-icons";
 import BottomSheet from "@gorhom/bottom-sheet";
 import * as FileSystem from "expo-file-system/legacy";
 import * as ImagePicker from "expo-image-picker";
-import { router } from "expo-router";
-import { useRef, useState } from "react";
+import { router, useLocalSearchParams } from "expo-router";
+import { useEffect, useRef, useState } from "react";
 import { Text, TextInput, TouchableOpacity, View } from "react-native";
 import { GestureHandlerRootView } from "react-native-gesture-handler";
 import { SafeAreaView } from "react-native-safe-area-context";
@@ -27,6 +27,30 @@ export default function CadastrarMedicamento() {
 
   const medicamentosTable = useMedicamentosTable();
   const notificacoesTable = useNotificacoesTable();
+
+  const params = useLocalSearchParams();
+
+  useEffect(() => {
+    if (!params.medicamento_id) return;
+
+    const id = Number(params.medicamento_id);
+
+    medicamentosTable.selectById(id).then((response) => {
+      if (!response) return;
+      setNomeMedicamento(response.nome_medicamento);
+      setDosagem(response.dosagem.toString());
+      setSelectedDose(response.medida);
+      setSelectedImage(response.imagem_uri || null);
+    });
+
+    notificacoesTable.selectByMedicamentoId(id).then((response) => {
+      if (!response?.length) return;
+      setDiasSelecionados(response.map((n) => n.dia));
+      const [h, m] = response[0].hora.split(":").map(Number);
+      setHora(h);
+      setMinuto(m);
+    });
+  }, [params.medicamento_id]);
 
   const formatDoseName = (dose: string) => {
     return dose.toLowerCase() === "mg" || dose.toLowerCase() === "ml"
@@ -48,20 +72,99 @@ export default function CadastrarMedicamento() {
 
       const uri = result.assets[0].uri;
       const fileName = uri.split("/").pop();
-      const dest = FileSystem.documentDirectory + fileName;
+      const dest = FileSystem.documentDirectory! + fileName;
 
       // Primeiro copia a imagem
       await FileSystem.copyAsync({ from: uri, to: dest });
 
       // Só então atualiza o estado
       setSelectedImage(dest);
-      console.log("SelectedImage: " + selectedImage);
     } catch (error) {
       console.error("Erro ao copiar imagem:", error);
     }
   };
 
+  const idMedicamento = params.medicamento_id
+    ? Number(params.medicamento_id)
+    : null;
+
   async function handleSubmit() {
+    try {
+      if (idMedicamento) {
+        await update();
+        console.log("Chamou update com id:", idMedicamento);
+      } else {
+        await insert();
+      }
+    } catch (e) {
+      console.error(e);
+      alert("Erro ao salvar medicamento");
+    } finally {
+      router.back();
+    }
+  }
+
+  async function update() {
+    try {
+      await medicamentosTable.update({
+        id_medicamento: Number(params.medicamento_id),
+        nome_medicamento: nomeMedicamento,
+        dosagem: Number(dosagem),
+        medida: selectedDose,
+        imagem_uri: selectedImage!,
+      });
+
+      const oldNotificacoes = await notificacoesTable.selectByMedicamentoId(
+        Number(params.medicamento_id)
+      );
+
+      for (const n of oldNotificacoes) {
+        await cancelNotification(n.id_notifee);
+      }
+
+      await notificacoesTable.deleteByMedicamentoId(
+        Number(params.medicamento_id)
+      );
+
+      for (const diaSemana of diasSelecionados) {
+        const now = new Date();
+        const target = new Date();
+        target.setHours(hora, minuto, 0, 0);
+
+        const diff = (diaSemana + 7 - now.getDay()) % 7;
+        if (diff === 0 && target <= now) {
+          target.setDate(target.getDate() + 7);
+        } else {
+          target.setDate(target.getDate() + diff);
+        }
+
+        const id_notifee = await scheduleNotification({
+          title: `Hora do medicamento: ${nomeMedicamento}`,
+          body: `Tomar ${dosagem} ${selectedDose}`,
+          timestamp: target.getTime(),
+          nome_medicamento: nomeMedicamento,
+          dosagem: Number(dosagem),
+          medida: selectedDose,
+        });
+
+        await notificacoesTable.insert({
+          id_notifee,
+          id_medicamento: Number(params.medicamento_id),
+          hora: `${hora.toString().padStart(2, "0")}:${minuto
+            .toString()
+            .padStart(2, "0")}`,
+          dia: diaSemana,
+        });
+      }
+
+      alert("Medicamento e notificações salvos!");
+    } catch (error) {
+      console.error("Erro ao atualizar medicamento:", error);
+      throw error;
+    }
+  }
+
+  async function insert() {
     try {
       const id_medicamento = await medicamentosTable.insert({
         nome_medicamento: nomeMedicamento,
@@ -86,6 +189,9 @@ export default function CadastrarMedicamento() {
           title: `Hora do medicamento: ${nomeMedicamento}`,
           body: `Tomar ${dosagem} ${selectedDose}`,
           timestamp: target.getTime(),
+          nome_medicamento: nomeMedicamento,
+          dosagem: Number(dosagem),
+          medida: selectedDose,
         });
 
         await notificacoesTable.insert({
@@ -102,8 +208,29 @@ export default function CadastrarMedicamento() {
     } catch (e) {
       console.error(e);
       alert("Erro ao salvar medicamento/notificação");
-    } finally {
+      throw e;
+    }
+  }
+
+  async function deleteById() {
+    try {
+      await medicamentosTable.deleteById(Number(params.medicamento_id));
+
+      const oldNotificacoes = await notificacoesTable.selectByMedicamentoId(
+        Number(params.medicamento_id)
+      );
+
+      for (const n of oldNotificacoes) {
+        await cancelNotification(n.id_notifee);
+      }
+
+      await notificacoesTable.deleteByMedicamentoId(
+        Number(params.medicamento_id)
+      );
+      alert("Medicamento deletado!");
       router.back();
+    } catch (error) {
+      console.log("Erro ao deletar medicamento:", error);
     }
   }
 
@@ -113,6 +240,9 @@ export default function CadastrarMedicamento() {
         <View className="flex-1">
           {/* Seletor de horário */}
           <DateTimePicker
+            initialDias={diasSelecionados}
+            initialHora={hora}
+            initialMinuto={minuto}
             onChange={(dias, h, m) => {
               setDiasSelecionados(dias);
               setHora(h);
@@ -173,6 +303,17 @@ export default function CadastrarMedicamento() {
               Cancelar
             </Text>
           </TouchableOpacity>
+
+          {params.medicamento_id && (
+            <TouchableOpacity
+              className="flex-1 bg-red-500 py-3 rounded-2xl mx-2"
+              onPress={deleteById}
+            >
+              <Text className="text-center text-white font-semibold text-lg">
+                Deletar
+              </Text>
+            </TouchableOpacity>
+          )}
 
           <TouchableOpacity
             className="flex-1 bg-sky-500 py-3 rounded-2xl ml-2"
