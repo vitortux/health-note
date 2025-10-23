@@ -88,6 +88,8 @@ export default function CadastrarMedicamento() {
     ? Number(params.medicamento_id)
     : null;
 
+  const isEditing = !isNaN(idMedicamento);
+
   async function handleSubmit() {
     try {
       if (idMedicamento) {
@@ -244,6 +246,7 @@ export default function CadastrarMedicamento() {
             initialHora={hora}
             initialMinuto={minuto}
             onChange={(dias, h, m) => {
+              console.log("Dias selecionados:", dias, "Hora:", h, "Minuto:", m);
               setDiasSelecionados(dias);
               setHora(h);
               setMinuto(m);
@@ -304,7 +307,7 @@ export default function CadastrarMedicamento() {
             </Text>
           </TouchableOpacity>
 
-          {params.medicamento_id && (
+          {isEditing && (
             <TouchableOpacity
               className="flex-1 bg-red-500 py-3 rounded-2xl mx-2"
               onPress={deleteById}

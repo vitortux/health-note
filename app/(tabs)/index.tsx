@@ -3,7 +3,7 @@ import {
   MedicamentoComAlarme,
   useMedicamentosTable,
 } from "@/hooks/useMedicamentosTable";
-import { getProximoMedicamento } from "@/utils/notifee";
+import { useNotificacoesTable } from "@/hooks/useNotificacoesTable";
 import { Feather } from "@expo/vector-icons";
 import { router, useNavigation } from "expo-router";
 import { useEffect, useState } from "react";
@@ -24,6 +24,7 @@ type Alarme = {
 export default function Home() {
   const navigation = useNavigation();
   const medicamentosTable = useMedicamentosTable();
+  const notificacoesTable = useNotificacoesTable();
 
   const [alarmes, setAlarmes] = useState<Alarme[]>([]);
   const [proximoMedicamento, setProximoMedicamento] = useState<any>();
@@ -43,8 +44,11 @@ export default function Home() {
           medida: row.medida,
           imagem: row.imagem_uri,
         }));
+
         setAlarmes(alarmesTransformados);
-        const proximo = await getProximoMedicamento();
+
+        const proximo = await notificacoesTable.getProximoMedicamento();
+
         setProximoMedicamento(proximo);
       } catch (error) {
         console.log("Erro ao carregar notificações:", error);

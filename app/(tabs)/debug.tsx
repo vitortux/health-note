@@ -32,12 +32,14 @@ export default function Debug() {
       const registros = await registrosTable.selectAll();
 
       const scheduledNotifs = await notifee.getTriggerNotifications();
+      const timestampAgora = Date.now(); // ← timestamp atual
 
       console.group("Banco de dados");
       console.log("💊 Medicamentos:", medicamentos);
       console.log("🔔 Notificações:", notificacoes);
       console.log("📝 Registros:", registros);
       console.log("⏰ Notifee:", scheduledNotifs);
+      console.log("🕒 Timestamp agora:", timestampAgora); // ← exibe o timestamp atual
       console.groupEnd();
     } catch (error) {
       console.log("Erro ao buscar dados do banco:", error);

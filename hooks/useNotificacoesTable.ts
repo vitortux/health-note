@@ -148,6 +148,72 @@ export function useNotificacoesTable() {
     return await database.getAllAsync(query, [id_medicamento]);
   }
 
+  async function getProximoMedicamento() {
+    const agora = new Date();
+    const hojeDia = agora.getDay(); // 0 = domingo
+
+    const rows = await database.getAllAsync(`
+    SELECT n.*, m.nome_medicamento, m.dosagem, m.medida, m.imagem_uri
+    FROM notificacoes n
+    JOIN medicamentos m ON n.id_medicamento = m.id_medicamento
+  `);
+
+    if (!rows || rows.length === 0) return null;
+
+    let proximo: any = null;
+    let menorDiffMs = Number.MAX_SAFE_INTEGER;
+
+    rows.forEach((row: any) => {
+      const [hora, minuto] = row.hora.split(":").map(Number);
+
+      row.dias = row.dias?.split(",").map(Number) || [row.dia]; // caso tenha múltiplos dias
+
+      row.dias.forEach((dia: number) => {
+        let diffDias = (dia - hojeDia + 7) % 7;
+
+        const dataNotificacao = new Date();
+        dataNotificacao.setDate(dataNotificacao.getDate() + diffDias);
+        dataNotificacao.setHours(hora, minuto, 0, 0);
+
+        // se já passou hoje, passa para a próxima semana
+        if (dataNotificacao < agora) {
+          dataNotificacao.setDate(dataNotificacao.getDate() + 7);
+        }
+
+        const diff = dataNotificacao.getTime() - agora.getTime();
+        if (diff < menorDiffMs) {
+          menorDiffMs = diff;
+          proximo = { ...row, timestamp: dataNotificacao.getTime() };
+        }
+      });
+    });
+
+    if (!proximo) return null;
+
+    const dataObj = new Date(proximo.timestamp);
+    const diffDiasFinal = Math.floor(
+      (dataObj.getTime() - agora.getTime()) / (1000 * 60 * 60 * 24)
+    );
+
+    return {
+      nome_medicamento: proximo.nome_medicamento,
+      dosagem: proximo.dosagem,
+      medida: proximo.medida,
+      timestamp: proximo.timestamp,
+      diffDias: diffDiasFinal,
+      data: dataObj.toLocaleDateString("pt-BR", {
+        weekday: "short",
+        day: "2-digit",
+        month: "short",
+      }),
+      hora: dataObj.toLocaleTimeString("pt-BR", {
+        hour: "2-digit",
+        minute: "2-digit",
+      }),
+      imagem_uri: proximo.imagem_uri,
+    };
+  }
+
   return {
     insert,
     deleteByMedicamentoId,
@@ -156,5 +222,6 @@ export function useNotificacoesTable() {
     selectByDiaComRegistro,
     deleteAll,
     selectByMedicamentoId,
+    getProximoMedicamento,
   };
 }
