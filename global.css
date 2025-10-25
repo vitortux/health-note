@@ -1,3 +1,25 @@
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+
+:root,
+.light {
+  --color-primary: #0ea5e9;
+  --color-main: #1f2937; /* Usado em textos principais*/
+  --color-secondary: #9ca3af; /* Textos secundários */
+  --color-label: #374151; /* Usado em labels */
+  --color-background: #fff; /* Background da página */
+  --color-card-background: #f8fafc; /* Usado em cards */
+}
+
+.dark {
+  --color-primary: #0ea5e9; /* Azul vibrante para destaques */
+  --color-main: #f8fafc; /* Texto principal claro */
+  --color-secondary: #d1d5db; /* Texto secundário */
+  --color-label: #e5e7eb; /* Labels */
+  --color-background: #000000; /* Fundo totalmente preto */
+  --color-card-background: #1a1a1a; /* Fundo de cards quase preto */
+}
+
+.high-contrast {
+}

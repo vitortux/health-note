@@ -62,12 +62,12 @@ export default function Home() {
   }, [navigation, medicamentosTable]);
 
   return (
-    <SafeAreaView className="flex-1 px-4 bg-white">
+    <SafeAreaView className="flex-1 px-4 bg-background">
       {/* Próximo medicamento */}
       <View className="py-[84px] mb-6 justify-center items-center">
         {proximoMedicamento ? (
           <>
-            <Text className="text-gray-800 font-extrabold text-3xl text-center">
+            <Text className="text-main font-extrabold text-3xl text-center">
               {`"${proximoMedicamento.nome_medicamento}" ${
                 proximoMedicamento.diffDias === 0
                   ? "hoje"
@@ -76,12 +76,12 @@ export default function Home() {
                     : `em ${proximoMedicamento.diffDias} dias`
               }`}
             </Text>
-            <Text className="text-gray-600 text-lg text-center">
+            <Text className="text-label text-lg text-center">
               {`previso p/ ${proximoMedicamento.data}, ${proximoMedicamento.hora}`}
             </Text>
           </>
         ) : (
-          <Text className="text-gray-800 font-extrabold text-3xl text-center">
+          <Text className="text-main font-extrabold text-3xl text-center">
             Nenhum medicamento agendado
           </Text>
         )}
@@ -90,13 +90,10 @@ export default function Home() {
       {/* Botões */}
       <View className="flex-row justify-end mb-4">
         <TouchableOpacity
-          className="bg-sky-500 p-3 rounded-full"
+          className="bg-primary p-3 rounded-full"
           onPress={() => router.navigate("/cadastrar-medicamento/null")}
         >
           <Feather name="plus" size={24} color="white" />
-        </TouchableOpacity>
-        <TouchableOpacity className="bg-sky-500 p-3 rounded-full ml-2">
-          <Feather name="settings" size={24} color="white" />
         </TouchableOpacity>
       </View>
 
@@ -115,7 +112,19 @@ export default function Home() {
             dosagem={alarme.dosagem}
             medida={alarme.medida}
             onPress={() =>
-              router.navigate(`/cadastrar-medicamento/${alarme.id_medicamento}`)
+              router.navigate({
+                pathname: "/cadastrar-medicamento/[medicamento_id]",
+                params: {
+                  medicamento_id: alarme.id_medicamento,
+                  hora: alarme.horario.split(":")[0],
+                  minuto: alarme.horario.split(":")[1],
+                  dias: alarme.dias.join(","), // ex: "1,3,5"
+                  nomeMedicamento: alarme.nomeMedicamento,
+                  dosagem: alarme.dosagem,
+                  medida: alarme.medida,
+                  imagem: alarme.imagem,
+                },
+              })
             }
           />
         ))}

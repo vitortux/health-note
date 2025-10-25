@@ -1,5 +1,6 @@
 import DateTimePicker from "@/components/DateTimePicker";
 import DosagemBottomSheet from "@/components/DosagemBottomSheet";
+import { useTheme } from "@/context/ThemeContext";
 import { useMedicamentosTable } from "@/hooks/useMedicamentosTable";
 import { useNotificacoesTable } from "@/hooks/useNotificacoesTable";
 import { cancelNotification, scheduleNotification } from "@/utils/notifee";
@@ -8,7 +9,7 @@ import BottomSheet from "@gorhom/bottom-sheet";
 import * as FileSystem from "expo-file-system/legacy";
 import * as ImagePicker from "expo-image-picker";
 import { router, useLocalSearchParams } from "expo-router";
-import { useEffect, useRef, useState } from "react";
+import { useRef, useState } from "react";
 import { Text, TextInput, TouchableOpacity, View } from "react-native";
 import { GestureHandlerRootView } from "react-native-gesture-handler";
 import { SafeAreaView } from "react-native-safe-area-context";
@@ -17,40 +18,27 @@ export default function CadastrarMedicamento() {
   const bottomSheetRef = useRef<BottomSheet>(null);
   const handleOpenPress = () => bottomSheetRef.current?.expand();
 
-  const [selectedDose, setSelectedDose] = useState<string>("unidade");
-  const [selectedImage, setSelectedImage] = useState<string | null>(null);
-  const [nomeMedicamento, setNomeMedicamento] = useState("");
-  const [dosagem, setDosagem] = useState("");
-  const [diasSelecionados, setDiasSelecionados] = useState<number[]>([]);
-  const [hora, setHora] = useState(0);
-  const [minuto, setMinuto] = useState(0);
+  const params = useLocalSearchParams();
+  const { theme } = useTheme();
+
+  const idMedicamento = Number(params.medicamento_id);
+  const isEditing = !Number.isNaN(idMedicamento);
+
+  // Estados iniciais vindo dos parâmetros da Home
+  const [nomeMedicamento, setNomeMedicamento] = useState(
+    params.nomeMedicamento || ""
+  );
+  const [dosagem, setDosagem] = useState(params.dosagem?.toString() || "");
+  const [selectedDose, setSelectedDose] = useState(params.medida || "unidade");
+  const [selectedImage, setSelectedImage] = useState(params.imagem || null);
+  const [diasSelecionados, setDiasSelecionados] = useState(
+    params.dias?.split(",").map(Number) || []
+  );
+  const [hora, setHora] = useState(Number(params.hora) || 0);
+  const [minuto, setMinuto] = useState(Number(params.minuto) || 0);
 
   const medicamentosTable = useMedicamentosTable();
   const notificacoesTable = useNotificacoesTable();
-
-  const params = useLocalSearchParams();
-
-  useEffect(() => {
-    if (!params.medicamento_id) return;
-
-    const id = Number(params.medicamento_id);
-
-    medicamentosTable.selectById(id).then((response) => {
-      if (!response) return;
-      setNomeMedicamento(response.nome_medicamento);
-      setDosagem(response.dosagem.toString());
-      setSelectedDose(response.medida);
-      setSelectedImage(response.imagem_uri || null);
-    });
-
-    notificacoesTable.selectByMedicamentoId(id).then((response) => {
-      if (!response?.length) return;
-      setDiasSelecionados(response.map((n) => n.dia));
-      const [h, m] = response[0].hora.split(":").map(Number);
-      setHora(h);
-      setMinuto(m);
-    });
-  }, [params.medicamento_id]);
 
   const formatDoseName = (dose: string) => {
     return dose.toLowerCase() === "mg" || dose.toLowerCase() === "ml"
@@ -83,12 +71,6 @@ export default function CadastrarMedicamento() {
       console.error("Erro ao copiar imagem:", error);
     }
   };
-
-  const idMedicamento = params.medicamento_id
-    ? Number(params.medicamento_id)
-    : null;
-
-  const isEditing = !isNaN(idMedicamento);
 
   async function handleSubmit() {
     try {
@@ -238,7 +220,7 @@ export default function CadastrarMedicamento() {
 
   return (
     <GestureHandlerRootView className="flex-1">
-      <SafeAreaView className="flex-1 px-4 bg-white pt-10">
+      <SafeAreaView className="flex-1 px-4 bg-background pt-10">
         <View className="flex-1">
           {/* Seletor de horário */}
           <DateTimePicker
@@ -256,9 +238,10 @@ export default function CadastrarMedicamento() {
           {/* Input do nome do medicamento */}
           <TextInput
             placeholder="Nome do medicamento"
-            className="border-b border-gray-300 pb-3 text-gray-800 text-xl h-16"
+            className="border-b border-card pb-3 text-main text-xl h-16"
             value={nomeMedicamento}
             onChangeText={setNomeMedicamento}
+            placeholderTextColor={theme === "dark" ? "#fff" : "1f2937"}
           />
 
           {/* Input + seletor de dosagem */}
@@ -269,26 +252,27 @@ export default function CadastrarMedicamento() {
               keyboardType="numeric"
               value={dosagem}
               onChangeText={setDosagem}
-              className="flex-1 border-b border-gray-300 mr-4 pb-3 text-gray-800 text-xl h-16"
+              className="flex-1 border-b border-card mr-4 pb-3 text-main text-xl h-16"
+              placeholderTextColor={theme === "dark" ? "#fff" : "1f2937"}
             />
 
             {/* Botão para abrir o BottomSheet */}
             <TouchableOpacity
-              className="px-6 py-3 rounded-xl justify-center border border-gray-300 bg-white h-16"
+              className="px-6 py-3 rounded-xl justify-center border border-card bg-card h-16"
               onPress={handleOpenPress}
             >
-              <Text className="text-gray-700 text-center font-semibold text-lg">
+              <Text className="text-label text-center font-semibold text-lg">
                 {formatDoseName(selectedDose)}
               </Text>
             </TouchableOpacity>
           </View>
 
           <TouchableOpacity
-            className="flex-row items-center justify-center border border-gray-300 bg-white rounded-xl h-16 mt-4 px-4"
+            className="flex-row items-center justify-center border border-card bg-card rounded-xl h-16 mt-4 px-4"
             onPress={pickImage}
           >
             <MaterialIcons name="image" size={24} color="#6B7280" />
-            <Text className="text-gray-600 text-center font-medium text-lg ml-2">
+            <Text className="text-label text-center font-medium text-lg ml-2">
               {selectedImage
                 ? selectedImage.split("/").pop()
                 : "Selecionar imagem do medicamento"}
@@ -297,29 +281,29 @@ export default function CadastrarMedicamento() {
         </View>
 
         {/* Botões de ação */}
-        <View className="flex-row justify-between items-center py-4 px-6 border-t border-gray-200">
+        <View className="flex-row justify-between items-center py-4 px-6 border-t border-card">
           <TouchableOpacity
-            className="flex-1 bg-gray-200 py-3 rounded-2xl mr-2"
+            className="flex-1 bg-card py-3 rounded-2xl mr-2"
             onPress={() => router.back()}
           >
-            <Text className="text-center text-gray-700 font-semibold text-lg">
+            <Text className="text-center text-label font-semibold text-lg">
               Cancelar
             </Text>
           </TouchableOpacity>
 
           {isEditing && (
             <TouchableOpacity
-              className="flex-1 bg-red-500 py-3 rounded-2xl mx-2"
+              className="flex-1 bg-card py-3 rounded-2xl mx-2"
               onPress={deleteById}
             >
-              <Text className="text-center text-white font-semibold text-lg">
+              <Text className="text-center text-label font-semibold text-lg">
                 Deletar
               </Text>
             </TouchableOpacity>
           )}
 
           <TouchableOpacity
-            className="flex-1 bg-sky-500 py-3 rounded-2xl ml-2"
+            className="flex-1 bg-primary py-3 rounded-2xl ml-2"
             onPress={handleSubmit}
           >
             <Text className="text-center text-white font-semibold text-lg">

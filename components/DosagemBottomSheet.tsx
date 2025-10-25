@@ -1,3 +1,4 @@
+import { useTheme } from "@/context/ThemeContext";
 import BottomSheet, {
   BottomSheetBackdrop,
   BottomSheetView,
@@ -28,12 +29,12 @@ const Dosagem = ({
   return (
     <TouchableOpacity
       onPress={onPress}
-      className="py-4 border-b border-gray-200"
+      className="py-4 border-b border-secondary bg-card"
       activeOpacity={0.6}
     >
       <Text
         className={`text-lg ${
-          selected ? "text-sky-500 font-bold" : "text-gray-700"
+          selected ? "text-primary font-bold" : "text-label"
         }`}
       >
         {formatName}
@@ -45,6 +46,7 @@ const Dosagem = ({
 const DosagemBottomSheet = forwardRef<Ref, DosagemBottomSheetProps>(
   function DosagemBottomSheet({ onSelectDose }, ref) {
     const snapPoints = useMemo(() => ["25%", "50%"], []);
+    const { theme } = useTheme();
 
     const renderBackdrop = useCallback(
       (props: any) => (
@@ -72,9 +74,12 @@ const DosagemBottomSheet = forwardRef<Ref, DosagemBottomSheetProps>(
         snapPoints={snapPoints}
         backdropComponent={renderBackdrop}
         enablePanDownToClose
+        backgroundStyle={{
+          backgroundColor: theme === "dark" ? "#1a1a1a" : "#fff",
+        }}
       >
-        <BottomSheetView className="flex-1 px-6 pt-6">
-          <Text className="text-2xl font-semibold mb-6 text-center text-gray-800">
+        <BottomSheetView className="flex-1 px-6 pt-6 bg-card">
+          <Text className="text-2xl font-semibold mb-6 text-center text-main">
             Selecione a dosagem
           </Text>
 

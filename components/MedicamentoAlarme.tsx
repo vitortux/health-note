@@ -35,13 +35,11 @@ export default function MedicamentoAlarme({
 
   return (
     <TouchableOpacity onPress={onPress}>
-      <View className="flex-row justify-between items-center py-6 px-4 rounded-3xl mb-4 bg-slate-50">
+      <View className="flex-row justify-between items-center py-6 px-4 rounded-[24px] mb-4 bg-card overflow-hidden">
         {/* Esquerda: horário e info do medicamento */}
         <View>
-          <Text className="text-gray-800 font-semibold text-4xl">
-            {horario}
-          </Text>
-          <Text className="text-gray-700 text-lg mt-1 font-medium">
+          <Text className="text-main font-semibold text-4xl">{horario}</Text>
+          <Text className="text-label text-lg mt-1 font-medium">
             {nomeMedicamento} — {dosagem} {formatDoseName(medida)}
           </Text>
         </View>
@@ -56,11 +54,11 @@ export default function MedicamentoAlarme({
                 className={`items-center relative ${index !== 0 ? "ml-1" : ""}`}
               >
                 {ativo && (
-                  <View className="w-1.5 h-1.5 rounded-full bg-sky-500 absolute -top-1" />
+                  <View className="w-1.5 h-1.5 rounded-full bg-primary absolute -top-1" />
                 )}
                 <Text
                   className={`font-semibold ${
-                    ativo ? "text-sky-500" : "text-gray-400"
+                    ativo ? "text-primary" : "text-secondary"
                   }`}
                 >
                   {dia.sigla}

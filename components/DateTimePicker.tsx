@@ -1,4 +1,5 @@
 // components/HorarioDiasPicker.tsx
+import { useTheme } from "@/context/ThemeContext";
 import WheelPicker, {
   type PickerItem,
   useOnPickerValueChangedEffect,
@@ -93,6 +94,8 @@ export default function DateTimePicker({
     onChange?.(diasSelecionados, value.value1, value.value2);
   }, [diasSelecionados, value.value1, value.value2]);
 
+  const { theme } = useTheme();
+
   return (
     <View>
       {/* Seletor de horário */}
@@ -107,6 +110,11 @@ export default function DateTimePicker({
           value={value.value1}
           width={100}
           enableScrollByTapOnItem
+          itemTextStyle={{
+            color: theme === "dark" ? "#fff" : "#111",
+            backgroundColor: theme === "dark" ? "#111" : "#fff",
+            borderRadius: 12,
+          }}
         />
         <ControlPicker
           control={pickerControl}
@@ -118,11 +126,16 @@ export default function DateTimePicker({
           value={value.value2}
           width={100}
           enableScrollByTapOnItem
+          itemTextStyle={{
+            color: theme === "dark" ? "#fff" : "#111",
+            backgroundColor: theme === "dark" ? "#111" : "#fff",
+            borderRadius: 12,
+          }}
         />
       </View>
 
       {/* Label informativa */}
-      <Text className="text-gray-700 text-lg mt-3 mb-6">{descricao}</Text>
+      <Text className="text-label text-lg mt-3 mb-6">{descricao}</Text>
 
       {/* Dias da semana */}
       <View className="flex-row justify-between mb-6">
@@ -131,11 +144,11 @@ export default function DateTimePicker({
           return (
             <TouchableOpacity
               key={dia}
-              className={`w-12 h-12 rounded-full items-center justify-center ${ativo ? "bg-sky-500" : "bg-gray-200"}`}
+              className={`w-12 h-12 rounded-full items-center justify-center ${ativo ? "bg-primary" : "bg-card"}`}
               onPress={() => toggleDia(index)}
             >
               <Text
-                className={`text-base font-bold ${ativo ? "text-white" : "text-gray-700"}`}
+                className={`text-base font-bold ${ativo ? "text-white" : "text-label"}`}
               >
                 {dia[0].toUpperCase()}
               </Text>

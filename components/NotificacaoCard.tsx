@@ -32,7 +32,7 @@ export default function NotificacaoCard({
   else bgColor = "bg-sky-500";
 
   return (
-    <View className="flex-row justify-between items-center py-6 px-4 rounded-3xl mb-4 bg-slate-50">
+    <View className="flex-row justify-between items-center py-6 px-4 rounded-3xl mb-4 bg-card">
       <View className="flex-row items-center">
         {notificacao.imagem_uri && (
           <Image
@@ -41,10 +41,10 @@ export default function NotificacaoCard({
           />
         )}
         <View>
-          <Text className="text-gray-800 font-semibold text-4xl">
+          <Text className="text-main font-semibold text-4xl">
             {notificacao.nome_medicamento}
           </Text>
-          <Text className="text-gray-700 text-lg mt-1 font-medium">
+          <Text className="text-label text-lg mt-1 font-medium">
             {notificacao.dosagem} {notificacao.medida}, às {notificacao.hora}
           </Text>
         </View>
@@ -54,7 +54,7 @@ export default function NotificacaoCard({
         onPress={onPressTomado}
         className={`px-4 py-2 rounded-full ${bgColor}`}
       >
-        <Text className="text-white font-bold">{status.toUpperCase()}</Text>
+        <Text className="text-main font-bold">{status.toUpperCase()}</Text>
       </TouchableOpacity>
     </View>
   );

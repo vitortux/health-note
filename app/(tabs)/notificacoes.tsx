@@ -70,13 +70,15 @@ export default function Notificacoes() {
   }, [navigation, notificacoesTable]);
 
   return (
-    <SafeAreaView className="flex-1 px-4 bg-white">
+    <SafeAreaView className="flex-1 px-4 bg-background">
       <View className="py-[84px] mb-6 justify-center items-center">
-        <Text className="text-gray-800 font-extrabold text-3xl text-center">
+        <Text className="text-main font-extrabold text-3xl text-center">
           Medicamentos no dia de hoje
         </Text>
-        <Text className="text-gray-600 text-lg text-center mt-2">
-          Confira seus horários e doses
+        <Text className="text-label text-lg text-center mt-2">
+          {notificacoes.length > 0
+            ? "Confira seus horários e doses"
+            : "Nenhum medicamento registrado para hoje 🎉"}
         </Text>
       </View>
 
