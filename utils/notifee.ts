@@ -98,3 +98,30 @@ export async function scheduleNotification(data: NotificationData) {
 
   return notifeeId;
 }
+
+export async function scheduleDailyReportNotification() {
+  await requestUserPermission();
+
+  const now = new Date();
+  const triggerTime = new Date(now.getTime() + 60 * 1000);
+
+  const trigger: TimestampTrigger = {
+    type: TriggerType.TIMESTAMP,
+    timestamp: triggerTime.getTime(),
+    repeatFrequency: RepeatFrequency.DAILY,
+  };
+
+  const channelId = await createChannelId();
+
+  const notifeeId = await notifee.createTriggerNotification(
+    {
+      id: "auto_send_email",
+      title: "Envio de relatório automático!",
+      body: "Seu relatório está sendo enviado para o e-mail do seu responsável.",
+      android: { channelId, loopSound: true, ongoing: true },
+    },
+    trigger
+  );
+
+  return notifeeId;
+}

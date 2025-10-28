@@ -1,5 +1,5 @@
 // components/HorarioDiasPicker.tsx
-import { useTheme } from "@/context/ThemeContext";
+import { useTheme } from "@/context/ConfigContext";
 import WheelPicker, {
   type PickerItem,
   useOnPickerValueChangedEffect,

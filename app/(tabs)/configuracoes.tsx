@@ -1,9 +1,9 @@
-import { ThemeVariant, useTheme } from "@/context/ThemeContext";
+import { ThemeVariant, useConfig } from "@/context/ConfigContext";
 import { Text, TouchableOpacity, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 
 export default function Configuracoes() {
-  const { theme, setTheme } = useTheme();
+  const { theme, setTheme } = useConfig();
 
   // Lista de todos os temas disponíveis
   const themes: ThemeVariant[] = ["light", "dark", "high-contrast"];

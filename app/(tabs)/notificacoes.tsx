@@ -60,7 +60,7 @@ export default function Notificacoes() {
           dataHoje
         );
         setNotificacoes(result);
-        console.log("Notificações carregadas:", result);
+        // console.log("Notificações carregadas:", result);
       } catch (error) {
         console.log("Erro ao carregar notificações:", error);
       }
