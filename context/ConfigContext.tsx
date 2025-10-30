@@ -3,6 +3,8 @@ import {
   scheduleDailyReportNotification,
 } from "@/utils/notifee";
 import AsyncStorage from "@react-native-async-storage/async-storage";
+import { setStatusBarStyle } from "expo-status-bar";
+
 import React, {
   createContext,
   ReactNode,
@@ -36,7 +38,7 @@ interface ConfigProviderProps {
 
 export const ThemeProvider = ({ children }: ConfigProviderProps) => {
   const [theme, setTheme] = useState<ThemeVariant>("light");
-  const [autoSendEmails, setAutoSendEmails] = useState(true);
+  const [autoSendEmails, setAutoSendEmails] = useState(false);
 
   useEffect(() => {
     async function loadTheme() {
@@ -45,6 +47,14 @@ export const ThemeProvider = ({ children }: ConfigProviderProps) => {
 
       if (storedTheme) {
         setTheme(storedTheme);
+
+        if (storedTheme === "dark") {
+          setStatusBarStyle("light", false);
+        } else if (storedTheme === "light") {
+          setStatusBarStyle("dark", false);
+        } else if (storedTheme === "high-contrast") {
+          setStatusBarStyle("dark", false);
+        }
       }
 
       if (storedAutoSend) {
@@ -61,6 +71,14 @@ export const ThemeProvider = ({ children }: ConfigProviderProps) => {
   async function setThemeAndSave(newTheme: ThemeVariant) {
     setTheme(newTheme);
     await AsyncStorage.setItem("theme", newTheme);
+
+    if (newTheme === "dark") {
+      setStatusBarStyle("light", true);
+    } else if (newTheme === "light") {
+      setStatusBarStyle("dark", true);
+    } else if (newTheme === "high-contrast") {
+      setStatusBarStyle("dark", true);
+    }
   }
 
   async function setAutoSendEmailsAndSave(value: boolean) {

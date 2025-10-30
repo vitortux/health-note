@@ -1,6 +1,6 @@
 import DateTimePicker from "@/components/DateTimePicker";
 import DosagemBottomSheet from "@/components/DosagemBottomSheet";
-import { useTheme } from "@/context/ConfigContext";
+import { useConfig } from "@/context/ConfigContext";
 import { useMedicamentosTable } from "@/hooks/useMedicamentosTable";
 import { useNotificacoesTable } from "@/hooks/useNotificacoesTable";
 import { cancelNotification, scheduleNotification } from "@/utils/notifee";
@@ -19,7 +19,7 @@ export default function CadastrarMedicamento() {
   const handleOpenPress = () => bottomSheetRef.current?.expand();
 
   const params = useLocalSearchParams();
-  const { theme } = useTheme();
+  const { theme } = useConfig();
 
   const idMedicamento = Number(params.medicamento_id);
   const isEditing = !Number.isNaN(idMedicamento);

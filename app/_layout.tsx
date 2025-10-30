@@ -2,13 +2,13 @@ import { initialize } from "@/database/schema";
 
 import notifee, { EventType } from "@notifee/react-native";
 
-import { ThemeProvider } from "@/context/ConfigContext";
+import { ThemeProvider, useConfig } from "@/context/ConfigContext";
 import { sendRelatorio } from "@/utils/emailjs";
 import { Stack } from "expo-router";
 import { SQLiteProvider } from "expo-sqlite";
-import { StatusBar } from "expo-status-bar";
 import { useEffect } from "react";
 import "../global.css";
+import { SafeAreaProvider } from "react-native-safe-area-context";
 
 export default function RootLayout() {
   useEffect(() => {
@@ -18,7 +18,8 @@ export default function RootLayout() {
       switch (type) {
         case EventType.DELIVERED:
           if (notificationId === "auto_send_email") {
-            sendRelatorio();
+            // sendRelatorio();
+            console.log("Vamos poupar e-mails");
           }
           break;
         case EventType.DISMISSED:
@@ -46,18 +47,19 @@ export default function RootLayout() {
   }, []);
 
   return (
-    <ThemeProvider>
-      <SQLiteProvider databaseName="app.db" onInit={initialize}>
-        <StatusBar style="dark" />
-        <Stack>
-          <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
-          <Stack.Screen name="+not-found" options={{ headerShown: false }} />
-          <Stack.Screen
-            name="cadastrar-medicamento/[medicamento_id]"
-            options={{ headerShown: false }}
-          />
-        </Stack>
-      </SQLiteProvider>
-    </ThemeProvider>
+    <SafeAreaProvider>
+      <ThemeProvider>
+        <SQLiteProvider databaseName="app.db" onInit={initialize}>
+          <Stack>
+            <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
+            <Stack.Screen name="+not-found" options={{ headerShown: false }} />
+            <Stack.Screen
+              name="cadastrar-medicamento/[medicamento_id]"
+              options={{ headerShown: false }}
+            />
+          </Stack>
+        </SQLiteProvider>
+      </ThemeProvider>
+    </SafeAreaProvider>
   );
 }

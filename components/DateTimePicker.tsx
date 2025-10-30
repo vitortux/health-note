@@ -1,5 +1,5 @@
 // components/HorarioDiasPicker.tsx
-import { useTheme } from "@/context/ConfigContext";
+import { useConfig } from "@/context/ConfigContext";
 import WheelPicker, {
   type PickerItem,
   useOnPickerValueChangedEffect,
@@ -94,7 +94,7 @@ export default function DateTimePicker({
     onChange?.(diasSelecionados, value.value1, value.value2);
   }, [diasSelecionados, value.value1, value.value2]);
 
-  const { theme } = useTheme();
+  const { theme } = useConfig();
 
   return (
     <View>

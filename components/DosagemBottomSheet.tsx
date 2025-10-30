@@ -1,4 +1,4 @@
-import { useTheme } from "@/context/ConfigContext";
+import { useConfig } from "@/context/ConfigContext";
 import BottomSheet, {
   BottomSheetBackdrop,
   BottomSheetView,
@@ -46,7 +46,7 @@ const Dosagem = ({
 const DosagemBottomSheet = forwardRef<Ref, DosagemBottomSheetProps>(
   function DosagemBottomSheet({ onSelectDose }, ref) {
     const snapPoints = useMemo(() => ["25%", "50%"], []);
-    const { theme } = useTheme();
+    const { theme } = useConfig();
 
     const renderBackdrop = useCallback(
       (props: any) => (
