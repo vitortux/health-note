@@ -1,6 +1,19 @@
 import { EmailJSResponseStatus, send } from "@emailjs/react-native";
+import { format } from "date-fns";
 
-export async function sendRelatorio() {
+export async function sendRelatorio(relatorio: any) {
+  const hoje = new Date();
+
+  let corpoEmail = `📅 Relatório diário - ${format(hoje, "dd/MM/yyyy")}\n\n`;
+
+  if (relatorio.length === 0) {
+    corpoEmail += "Nenhum medicamento programado para hoje.";
+  } else {
+    relatorio.forEach((item) => {
+      corpoEmail += `${item.status} — ${item.nome} às ${item.hora}\n`;
+    });
+  }
+
   try {
     await send(
       process.env.EXPO_PUBLIC_EMAILJS_SERVICE_ID!,
@@ -8,7 +21,7 @@ export async function sendRelatorio() {
       {
         name: "Chaves",
         email: process.env.EXPO_PUBLIC_TEST_EMAIL!,
-        message: "This is a static message",
+        message: corpoEmail,
       },
       {
         publicKey: process.env.EXPO_PUBLIC_EMAILJS_USER_ID!,

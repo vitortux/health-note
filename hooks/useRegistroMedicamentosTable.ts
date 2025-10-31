@@ -53,5 +53,102 @@ export function useRegistroMedicamentosTable() {
     }
   }
 
-  return { insert, selectAll, deleteAll };
+  async function ensureDailyRecords(date: Date) {
+    const dateString = format(date, "yyyy-MM-dd");
+
+    // Pega todas as notificações existentes
+    const notificacoes = await database.getAllAsync(`
+    SELECT id_notifee, id_medicamento
+    FROM notificacoes
+  `);
+
+    // Pega registros já existentes pra hoje
+    const registrosHoje = await database.getAllAsync(
+      `
+    SELECT id_notifee
+    FROM registro_medicamentos
+    WHERE data = $data
+    `,
+      { $data: dateString }
+    );
+
+    const idsRegistrados = registrosHoje.map((r) => r.id_notifee);
+
+    // Filtra notificações que ainda não têm registro
+    const naoRegistrados = notificacoes.filter(
+      (n) => !idsRegistrados.includes(n.id_notifee)
+    );
+
+    // Insere um registro "não tomado" (tomado = 0) para cada id_notifee
+    for (const n of naoRegistrados) {
+      await database.runAsync(
+        `
+      INSERT INTO registro_medicamentos (id_notifee, data, tomado)
+      VALUES ($id_notifee, $data, 0)
+      `,
+        { $id_notifee: n.id_notifee, $data: dateString }
+      );
+    }
+
+    console.log(
+      `✅ ${naoRegistrados.length} registros não tomados inseridos automaticamente para ${dateString}`
+    );
+  }
+
+  async function getDailyReport(date: Date) {
+    await ensureDailyRecords(date);
+    const dateString = format(date, "yyyy-MM-dd");
+
+    const rows = await database.getAllAsync(
+      `
+    SELECT 
+      m.nome_medicamento,
+      n.hora,
+      r.tomado
+    FROM registro_medicamentos r
+    JOIN notificacoes n ON n.id_notifee = r.id_notifee
+    JOIN medicamentos m ON m.id_medicamento = n.id_medicamento
+    WHERE r.data = $data
+    ORDER BY n.hora ASC;
+    `,
+      { $data: dateString }
+    );
+
+    // Agrupa por medicamento, mantendo o primeiro horário e o pior status
+    const grouped = rows.reduce(
+      (acc, row) => {
+        if (!acc[row.nome_medicamento]) {
+          acc[row.nome_medicamento] = {
+            nome: row.nome_medicamento,
+            hora: row.hora,
+            status:
+              row.tomado === 1
+                ? "✅ Tomou no horário"
+                : row.tomado === 2
+                  ? "⏰ Tomou com atraso"
+                  : "❌ Não tomou",
+          };
+        } else {
+          // Atualiza status se houver um pior (❌ > ⏰ > ✅)
+          const statusAtual = acc[row.nome_medicamento].status;
+          const novoStatus =
+            row.tomado === 0
+              ? "❌ Não tomou"
+              : row.tomado === 2
+                ? statusAtual === "✅ Tomou no horário"
+                  ? "⏰ Tomou com atraso"
+                  : statusAtual
+                : statusAtual;
+
+          acc[row.nome_medicamento].status = novoStatus;
+        }
+        return acc;
+      },
+      {} as Record<string, { nome: string; hora: string; status: string }>
+    );
+
+    return Object.values(grouped);
+  }
+
+  return { insert, selectAll, deleteAll, getDailyReport };
 }
