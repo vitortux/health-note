@@ -1,10 +1,6 @@
 import { type SQLiteDatabase } from "expo-sqlite";
 
 export async function initialize(database: SQLiteDatabase) {
-  // await database.execAsync("DROP TABLE IF EXISTS medicamentos;");
-  // await database.execAsync("DROP TABLE IF EXISTS notificacoes;");
-  // await database.execAsync("DROP TABLE IF EXISTS registro_medicamentos;");
-
   await database.execAsync(`
     CREATE TABLE IF NOT EXISTS medicamentos (
       id_medicamento INTEGER PRIMARY KEY AUTOINCREMENT,

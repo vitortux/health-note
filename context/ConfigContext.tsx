@@ -14,7 +14,12 @@ import React, {
 } from "react";
 import { View } from "react-native";
 
-export type ThemeVariant = "light" | "dark" | "high-contrast";
+export type ThemeVariant =
+  | "light"
+  | "dark"
+  | "deuteranopia"
+  | "protanopia"
+  | "tritanopia";
 
 export interface ConfigContextProps {
   theme: ThemeVariant;
@@ -52,7 +57,11 @@ export const ThemeProvider = ({ children }: ConfigProviderProps) => {
           setStatusBarStyle("light", false);
         } else if (storedTheme === "light") {
           setStatusBarStyle("dark", false);
-        } else if (storedTheme === "high-contrast") {
+        } else if (storedTheme === "deuteranopia") {
+          setStatusBarStyle("dark", false);
+        } else if (storedTheme === "protanopia") {
+          setStatusBarStyle("dark", false);
+        } else if (storedTheme === "tritanopia") {
           setStatusBarStyle("dark", false);
         }
       }
@@ -76,8 +85,12 @@ export const ThemeProvider = ({ children }: ConfigProviderProps) => {
       setStatusBarStyle("light", true);
     } else if (newTheme === "light") {
       setStatusBarStyle("dark", true);
-    } else if (newTheme === "high-contrast") {
-      setStatusBarStyle("dark", true);
+    } else if (newTheme === "deuteranopia") {
+      setStatusBarStyle("dark", false);
+    } else if (newTheme === "protanopia") {
+      setStatusBarStyle("dark", false);
+    } else if (newTheme === "tritanopia") {
+      setStatusBarStyle("dark", false);
     }
   }
 

@@ -1,4 +1,5 @@
 import { useSQLiteContext } from "expo-sqlite";
+import { subMonths, format } from "date-fns";
 
 export type RegistroMedicamento = {
   id_registro?: number;

@@ -21,5 +21,32 @@
   --color-card-background: #1a1a1a; /* Fundo de cards quase preto */
 }
 
-.high-contrast {
+/* Tema para Deuteranopia (verde-vermelho) */
+.deuteranopia {
+  --color-primary: #007acc; /* Azul forte, seguro */
+  --color-main: #222222;
+  --color-secondary: #767676;
+  --color-label: #444444;
+  --color-background: #ffffff;
+  --color-card-background: #f1f1f1;
+}
+
+/* Tema para Protanopia (vermelho) */
+.protanopia {
+  --color-primary: #007acc; /* Evita tons avermelhados */
+  --color-main: #202020;
+  --color-secondary: #7a7a7a;
+  --color-label: #3a3a3a;
+  --color-background: #ffffff;
+  --color-card-background: #f2f2f2;
+}
+
+/* Tema para Tritanopia (azul-amarelo) */
+.tritanopia {
+  --color-primary: #d75a00; /* Laranja vibrante, substitui azul */
+  --color-main: #1f1f1f;
+  --color-secondary: #808080;
+  --color-label: #3b3b3b;
+  --color-background: #ffffff;
+  --color-card-background: #f3f3f3;
 }

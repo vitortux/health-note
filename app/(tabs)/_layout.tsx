@@ -14,11 +14,36 @@ export default function TabsLayout() {
           inactive: "#9ca3af",
           background: "#ffffff",
         }
-      : {
-          active: "#0ea5e9",
-          inactive: "#d1d5db",
-          background: "#000000",
-        };
+      : theme === "dark"
+        ? {
+            active: "#0ea5e9",
+            inactive: "#d1d5db",
+            background: "#000000",
+          }
+        : theme === "deuteranopia"
+          ? {
+              active: "#0072b2", // Azul seguro (em vez de verde)
+              inactive: "#999999",
+              background: "#ffffff",
+            }
+          : theme === "protanopia"
+            ? {
+                active: "#009e73", // Verde-azulado mais neutro
+                inactive: "#aaaaaa",
+                background: "#ffffff",
+              }
+            : theme === "tritanopia"
+              ? {
+                  active: "#e69f00", // Laranja visível pra quem tem tritanopia
+                  inactive: "#888888",
+                  background: "#ffffff",
+                }
+              : {
+                  // fallback padrão
+                  active: "#0ea5e9",
+                  inactive: "#9ca3af",
+                  background: "#ffffff",
+                };
 
   return (
     <Tabs

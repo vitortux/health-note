@@ -2,13 +2,12 @@ import { initialize } from "@/database/schema";
 
 import notifee, { EventType } from "@notifee/react-native";
 
-import { ThemeProvider, useConfig } from "@/context/ConfigContext";
-import { sendRelatorio } from "@/utils/emailjs";
+import { ThemeProvider } from "@/context/ConfigContext";
 import { Stack } from "expo-router";
 import { SQLiteProvider } from "expo-sqlite";
 import { useEffect } from "react";
-import "../global.css";
 import { SafeAreaProvider } from "react-native-safe-area-context";
+import "../global.css";
 
 export default function RootLayout() {
   useEffect(() => {
