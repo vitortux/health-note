@@ -1,7 +1,7 @@
 import { EmailJSResponseStatus, send } from "@emailjs/react-native";
 import { format } from "date-fns";
 
-export async function sendRelatorio(relatorio: any) {
+export async function sendRelatorio(relatorio: any, responsavelEmail: string) {
   const ontem = new Date();
   ontem.setDate(ontem.getDate() - 1);
 
@@ -21,7 +21,7 @@ export async function sendRelatorio(relatorio: any) {
       process.env.EXPO_PUBLIC_EMAILJS_TEMPLATE_ID!,
       {
         name: "Equipe Health Note",
-        email: process.env.EXPO_PUBLIC_TEST_EMAIL!,
+        email: responsavelEmail,
         message: corpoEmail,
       },
       {

@@ -1,9 +1,11 @@
 import { useRegistroMedicamentosTable } from "@/hooks/useRegistroMedicamentosTable";
+import { sendRelatorio } from "@/utils/emailjs";
 import notifee, { EventType } from "@notifee/react-native";
+import AsyncStorage from "@react-native-async-storage/async-storage";
 import { useEffect } from "react";
 
 export default function NotifeeListener() {
-  const { gerarRelatorioDiario } = useRegistroMedicamentosTable();
+  const { gerarRelatorio } = useRegistroMedicamentosTable();
 
   useEffect(() => {
     const unsubscribeForeground = notifee.onForegroundEvent(
@@ -12,9 +14,13 @@ export default function NotifeeListener() {
           type === EventType.DELIVERED &&
           detail.notification?.id === "auto_send_email"
         ) {
-          // const report = await gerarRelatorioDiario();
-          // await sendRelatorio(report);
-          console.log("Vamos economizar e-mails :)");
+          const ontem = new Date();
+          ontem.setDate(ontem.getDate() - 1);
+          const report = await gerarRelatorio(ontem);
+          const savedEmail = await AsyncStorage.getItem("responsavelEmail");
+          if (!savedEmail) return console.log("E-mail não definido.");
+          await sendRelatorio(report, savedEmail);
+          // console.log("Vamos economizar e-mails :)");
         }
       }
     );

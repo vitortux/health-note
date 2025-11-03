@@ -23,9 +23,12 @@ export type ThemeVariant =
 
 export interface ConfigContextProps {
   theme: ThemeVariant;
-  setTheme: (newTheme: ThemeVariant) => void;
+  setTheme: (theme: ThemeVariant) => void;
   autoSendEmails: boolean;
   setAutoSendEmails: (value: boolean) => void;
+  responsavelEmail: string;
+  nomeUsuario: string;
+  saveEmailAndName: (email: string, nome: string) => void;
 }
 
 const ConfigContext = createContext<ConfigContextProps>({
@@ -33,7 +36,10 @@ const ConfigContext = createContext<ConfigContextProps>({
   setTheme: () => {},
   autoSendEmails: false,
   setAutoSendEmails: () => {},
-} as ConfigContextProps);
+  responsavelEmail: "",
+  nomeUsuario: "",
+  saveEmailAndName: () => {},
+});
 
 export const useConfig = (): ConfigContextProps => useContext(ConfigContext);
 
@@ -44,11 +50,18 @@ interface ConfigProviderProps {
 export const ThemeProvider = ({ children }: ConfigProviderProps) => {
   const [theme, setTheme] = useState<ThemeVariant>("light");
   const [autoSendEmails, setAutoSendEmails] = useState(false);
+  const [responsavelEmail, setResponsavelEmail] = useState("");
+  const [nomeUsuario, setNomeUsuario] = useState("");
 
   useEffect(() => {
-    async function loadTheme() {
+    async function loadConfig() {
       const storedTheme = (await AsyncStorage.getItem("theme")) as ThemeVariant;
       const storedAutoSend = await AsyncStorage.getItem("autoSendEmails");
+      const email = await AsyncStorage.getItem("responsavelEmail");
+      const nome = await AsyncStorage.getItem("nomeUsuario");
+
+      if (email) setResponsavelEmail(email);
+      if (nome) setNomeUsuario(nome);
 
       if (storedTheme) {
         setTheme(storedTheme);
@@ -74,7 +87,7 @@ export const ThemeProvider = ({ children }: ConfigProviderProps) => {
       }
     }
 
-    loadTheme();
+    loadConfig();
   }, []);
 
   async function setThemeAndSave(newTheme: ThemeVariant) {
@@ -105,11 +118,26 @@ export const ThemeProvider = ({ children }: ConfigProviderProps) => {
     }
   }
 
+  async function saveEmailAndName(email: string, nome: string) {
+    if (!email || !nome) throw new Error("Nome e e-mail são obrigatórios");
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(email)) throw new Error("E-mail inválido");
+
+    setResponsavelEmail(email);
+    setNomeUsuario(nome);
+
+    await AsyncStorage.setItem("responsavelEmail", email);
+    await AsyncStorage.setItem("nomeUsuario", nome);
+  }
+
   const contextValue: ConfigContextProps = {
     theme,
     autoSendEmails,
     setTheme: setThemeAndSave,
     setAutoSendEmails: setAutoSendEmailsAndSave,
+    responsavelEmail,
+    nomeUsuario,
+    saveEmailAndName,
   };
 
   return (

@@ -57,24 +57,21 @@ export function useRegistroMedicamentosTable() {
     }
   }
 
-  async function gerarRelatorioDiario() {
-    const ontem = new Date();
-    ontem.setDate(ontem.getDate() - 1);
-
-    const dataOntem = format(ontem, "yyyy-MM-dd");
-    const diaSemanaOntem = ontem.getDay();
+  async function gerarRelatorio(data: Date) {
+    const dataFormatada = format(data, "yyyy-MM-dd");
+    const diaSemana = data.getDay();
     const horaAgora = format(new Date(), "HH:mm:ss");
 
     const notificacoesOntem = await notificacoesTable.selectByDiaComRegistro(
-      diaSemanaOntem,
-      dataOntem
+      diaSemana,
+      dataFormatada
     );
 
     for (const notif of notificacoesOntem) {
       if (notif.tomado === null) {
         await insert({
           id_notifee: notif.id_notifee,
-          data: dataOntem,
+          data: dataFormatada,
           hora: horaAgora,
           tomado: 0,
         });
@@ -131,7 +128,7 @@ export function useRegistroMedicamentosTable() {
     insert,
     selectAll,
     deleteAll,
-    gerarRelatorioDiario,
+    gerarRelatorio,
     selectAllComDetalhes,
   };
 }
