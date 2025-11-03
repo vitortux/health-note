@@ -9,7 +9,7 @@
   --color-secondary: #9ca3af; /* Textos secundários */
   --color-label: #374151; /* Usado em labels */
   --color-background: #fff; /* Background da página */
-  --color-card-background: #f8fafc; /* Usado em cards */
+  --color-card-background: #f3f4f6; /* Usado em cards */
 }
 
 .dark {
@@ -23,30 +23,30 @@
 
 /* Tema para Deuteranopia (verde-vermelho) */
 .deuteranopia {
-  --color-primary: #007acc; /* Azul forte, seguro */
-  --color-main: #222222;
-  --color-secondary: #767676;
-  --color-label: #444444;
+  --color-primary: #007acc; /* Azul seguro, perceptível */
+  --color-main: #1f1f1f; /* Texto escuro forte */
+  --color-secondary: #5f6368; /* Cinza médio */
+  --color-label: #3c4043;
   --color-background: #ffffff;
-  --color-card-background: #f1f1f1;
+  --color-card-background: #f3f4f6;
 }
 
 /* Tema para Protanopia (vermelho) */
 .protanopia {
-  --color-primary: #007acc; /* Evita tons avermelhados */
-  --color-main: #202020;
-  --color-secondary: #7a7a7a;
-  --color-label: #3a3a3a;
+  --color-primary: #0088cc; /* Azul-turquesa mais forte */
+  --color-main: #202124;
+  --color-secondary: #606367;
+  --color-label: #3c4043;
   --color-background: #ffffff;
-  --color-card-background: #f2f2f2;
+  --color-card-background: #f3f4f6;
 }
 
 /* Tema para Tritanopia (azul-amarelo) */
 .tritanopia {
-  --color-primary: #d75a00; /* Laranja vibrante, substitui azul */
+  --color-primary: #d75a00; /* Laranja forte, visível */
   --color-main: #1f1f1f;
-  --color-secondary: #808080;
-  --color-label: #3b3b3b;
+  --color-secondary: #5e5e5e;
+  --color-label: #3c3c3c;
   --color-background: #ffffff;
-  --color-card-background: #f3f3f3;
+  --color-card-background: #f3f4f6;
 }

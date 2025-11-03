@@ -26,10 +26,25 @@ export default function NotificacaoCard({
 
   const status = getStatus();
 
-  let bgColor;
-  if (status === "tomado") bgColor = "bg-sky-500";
-  else if (status === "atrasado") bgColor = "bg-red-500";
-  else bgColor = "bg-sky-500";
+  // Define label e cores de status
+  let labelColor, labelText;
+  switch (status) {
+    case "tomado":
+      labelColor = "bg-green-500";
+      labelText = "TOMADO";
+      break;
+    case "atrasado":
+      labelColor = "bg-red-500";
+      labelText = "ATRASADO";
+      break;
+    default:
+      labelColor = "bg-sky-500";
+      labelText = "PENDENTE";
+  }
+
+  // Define cor e desabilitação do botão
+  const isTomado = status === "tomado";
+  const buttonColor = isTomado ? "bg-gray-400" : "bg-sky-500";
 
   return (
     <View className="flex-row justify-between items-center py-6 px-4 rounded-3xl mb-4 bg-card">
@@ -41,20 +56,35 @@ export default function NotificacaoCard({
           />
         )}
         <View>
-          <Text className="text-main font-semibold text-4xl">
+          <Text className="text-main font-semibold text-3xl">
             {notificacao.nome_medicamento}
           </Text>
           <Text className="text-label text-lg mt-1 font-medium">
             {notificacao.dosagem} {notificacao.medida}, às {notificacao.hora}
           </Text>
+
+          {/* Label de status */}
+          <View
+            className={`self-start mt-2 px-3 py-1 rounded-full ${labelColor}`}
+          >
+            <Text className="text-white font-semibold text-sm">
+              {labelText}
+            </Text>
+          </View>
         </View>
       </View>
 
+      {/* Botão de ação */}
       <TouchableOpacity
-        onPress={onPressTomado}
-        className={`px-4 py-2 rounded-full ${bgColor}`}
+        onPress={!isTomado ? onPressTomado : undefined}
+        disabled={isTomado}
+        className={`px-4 py-2 rounded-full ${buttonColor} ${
+          isTomado ? "opacity-60" : "active:opacity-80"
+        }`}
       >
-        <Text className="text-main font-bold">{status.toUpperCase()}</Text>
+        <Text className="text-white font-bold">
+          {isTomado ? "TOMADO" : "TOMAR"}
+        </Text>
       </TouchableOpacity>
     </View>
   );

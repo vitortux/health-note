@@ -43,7 +43,7 @@ interface ConfigProviderProps {
 
 export const ThemeProvider = ({ children }: ConfigProviderProps) => {
   const [theme, setTheme] = useState<ThemeVariant>("light");
-  const [autoSendEmails, setAutoSendEmails] = useState(true);
+  const [autoSendEmails, setAutoSendEmails] = useState(false);
 
   useEffect(() => {
     async function loadTheme() {

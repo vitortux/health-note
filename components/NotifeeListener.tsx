@@ -1,10 +1,9 @@
 import { useRegistroMedicamentosTable } from "@/hooks/useRegistroMedicamentosTable";
-import { sendRelatorio } from "@/utils/emailjs";
 import notifee, { EventType } from "@notifee/react-native";
 import { useEffect } from "react";
 
 export default function NotifeeListener() {
-  const { getDailyReport } = useRegistroMedicamentosTable();
+  const { gerarRelatorioDiario } = useRegistroMedicamentosTable();
 
   useEffect(() => {
     const unsubscribeForeground = notifee.onForegroundEvent(
@@ -13,8 +12,9 @@ export default function NotifeeListener() {
           type === EventType.DELIVERED &&
           detail.notification?.id === "auto_send_email"
         ) {
-          const report = await getDailyReport(new Date());
-          await sendRelatorio(report);
+          // const report = await gerarRelatorioDiario();
+          // await sendRelatorio(report);
+          console.log("Vamos economizar e-mails :)");
         }
       }
     );

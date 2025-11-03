@@ -11,7 +11,6 @@ import * as ImagePicker from "expo-image-picker";
 import { router, useLocalSearchParams } from "expo-router";
 import { useRef, useState } from "react";
 import { Text, TextInput, TouchableOpacity, View } from "react-native";
-import { GestureHandlerRootView } from "react-native-gesture-handler";
 import { SafeAreaView } from "react-native-safe-area-context";
 
 export default function CadastrarMedicamento() {
@@ -219,7 +218,7 @@ export default function CadastrarMedicamento() {
   }
 
   return (
-    <GestureHandlerRootView className="flex-1">
+    <View className="flex-1">
       <SafeAreaView className="flex-1 px-4 bg-background pt-10">
         <View className="flex-1">
           {/* Seletor de horário */}
@@ -228,7 +227,7 @@ export default function CadastrarMedicamento() {
             initialHora={hora}
             initialMinuto={minuto}
             onChange={(dias, h, m) => {
-              console.log("Dias selecionados:", dias, "Hora:", h, "Minuto:", m);
+              // console.log("Dias selecionados:", dias, "Hora:", h, "Minuto:", m);
               setDiasSelecionados(dias);
               setHora(h);
               setMinuto(m);
@@ -241,7 +240,7 @@ export default function CadastrarMedicamento() {
             className="border-b border-card pb-3 text-main text-xl h-16"
             value={nomeMedicamento}
             onChangeText={setNomeMedicamento}
-            placeholderTextColor={theme === "dark" ? "#fff" : "1f2937"}
+            placeholderTextColor={theme === "dark" ? "#fff" : "#1f2937"}
           />
 
           {/* Input + seletor de dosagem */}
@@ -253,7 +252,7 @@ export default function CadastrarMedicamento() {
               value={dosagem}
               onChangeText={setDosagem}
               className="flex-1 border-b border-card mr-4 pb-3 text-main text-xl h-16"
-              placeholderTextColor={theme === "dark" ? "#fff" : "1f2937"}
+              placeholderTextColor={theme === "dark" ? "#fff" : "#1f2937"}
             />
 
             {/* Botão para abrir o BottomSheet */}
@@ -320,6 +319,6 @@ export default function CadastrarMedicamento() {
           bottomSheetRef.current?.close();
         }}
       />
-    </GestureHandlerRootView>
+    </View>
   );
 }

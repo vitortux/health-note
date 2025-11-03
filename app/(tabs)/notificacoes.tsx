@@ -4,6 +4,7 @@ import {
   useNotificacoesTable,
 } from "@/hooks/useNotificacoesTable";
 import { useRegistroMedicamentosTable } from "@/hooks/useRegistroMedicamentosTable";
+import { format } from "date-fns";
 import { useNavigation } from "expo-router";
 import { useEffect, useState } from "react";
 import { ScrollView, Text, View } from "react-native";
@@ -29,18 +30,31 @@ export default function Notificacoes() {
   );
 
   async function handleSubmit(notificacao: NotificacaoComRegistro) {
-    const hoje = new Date().toISOString().split("T")[0];
+    const agora = new Date();
+    const dataHoje = format(agora, "yyyy-MM-dd");
+    const horaAgora = format(agora, "HH:mm");
+
+    // Define o status baseado no horário previsto
+    let statusTomado = 1; // 1 = tomou normalmente
+    if (notificacao.hora && horaAgora > notificacao.hora) {
+      statusTomado = 2; // 2 = tomou com atraso
+    }
 
     try {
+      // Insere o registro no banco
       await registroTable.insert({
         id_notifee: notificacao.id_notifee,
-        data: hoje,
-        tomado: 1,
+        data: dataHoje,
+        hora: horaAgora,
+        tomado: statusTomado,
       });
 
+      // Atualiza o estado das notificações
       setNotificacoes((prev) =>
         prev.map((n) =>
-          n.id_notifee === notificacao.id_notifee ? { ...n, tomado: 1 } : n
+          n.id_notifee === notificacao.id_notifee
+            ? { ...n, tomado: statusTomado }
+            : n
         )
       );
     } catch (error) {
@@ -78,7 +92,7 @@ export default function Notificacoes() {
         <Text className="text-label text-lg text-center mt-2">
           {notificacoes.length > 0
             ? "Confira seus horários e doses"
-            : "Nenhum medicamento registrado para hoje 🎉"}
+            : "Nenhum medicamento registrado para hoje."}
         </Text>
       </View>
 

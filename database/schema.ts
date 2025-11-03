@@ -1,6 +1,10 @@
 import { type SQLiteDatabase } from "expo-sqlite";
 
 export async function initialize(database: SQLiteDatabase) {
+  // await database.execAsync("DROP TABLE IF EXISTS medicamentos;");
+  // await database.execAsync("DROP TABLE IF EXISTS medicamento_horarios;");
+  // await database.execAsync("DROP TABLE IF EXISTS registro_medicamentos;");
+
   await database.execAsync(`
     CREATE TABLE IF NOT EXISTS medicamentos (
       id_medicamento INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -22,6 +26,7 @@ export async function initialize(database: SQLiteDatabase) {
       id_registro INTEGER PRIMARY KEY AUTOINCREMENT,
       id_notifee TEXT NOT NULL,
       data TEXT NOT NULL,
+      hora TEXT,
       tomado INTEGER NOT NULL,
       UNIQUE(id_notifee, data),
       FOREIGN KEY(id_notifee) REFERENCES notificacoes(id_notifee) ON DELETE CASCADE

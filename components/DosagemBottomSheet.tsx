@@ -46,6 +46,7 @@ const Dosagem = ({
 const DosagemBottomSheet = forwardRef<Ref, DosagemBottomSheetProps>(
   function DosagemBottomSheet({ onSelectDose }, ref) {
     const snapPoints = useMemo(() => ["25%", "50%"], []);
+
     const { theme } = useConfig();
 
     const renderBackdrop = useCallback(
@@ -75,7 +76,10 @@ const DosagemBottomSheet = forwardRef<Ref, DosagemBottomSheetProps>(
         backdropComponent={renderBackdrop}
         enablePanDownToClose
         backgroundStyle={{
-          backgroundColor: theme === "dark" ? "#1a1a1a" : "#fff",
+          backgroundColor: theme === "dark" ? "#1a1a1a" : "#f3f4f6",
+        }}
+        handleIndicatorStyle={{
+          backgroundColor: theme === "dark" ? "#fff" : "#000",
         }}
       >
         <BottomSheetView className="flex-1 px-6 pt-6 bg-card">

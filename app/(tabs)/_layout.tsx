@@ -7,43 +7,40 @@ export default function TabsLayout() {
   const { theme } = useConfig();
   const insets = useSafeAreaInsets();
 
-  const colors =
-    theme === "light"
-      ? {
+  const colors = (() => {
+    switch (theme) {
+      case "light":
+        return {
           active: "#0ea5e9",
           inactive: "#9ca3af",
           background: "#ffffff",
-        }
-      : theme === "dark"
-        ? {
-            active: "#0ea5e9",
-            inactive: "#d1d5db",
-            background: "#000000",
-          }
-        : theme === "deuteranopia"
-          ? {
-              active: "#0072b2", // Azul seguro (em vez de verde)
-              inactive: "#999999",
-              background: "#ffffff",
-            }
-          : theme === "protanopia"
-            ? {
-                active: "#009e73", // Verde-azulado mais neutro
-                inactive: "#aaaaaa",
-                background: "#ffffff",
-              }
-            : theme === "tritanopia"
-              ? {
-                  active: "#e69f00", // Laranja visível pra quem tem tritanopia
-                  inactive: "#888888",
-                  background: "#ffffff",
-                }
-              : {
-                  // fallback padrão
-                  active: "#0ea5e9",
-                  inactive: "#9ca3af",
-                  background: "#ffffff",
-                };
+        };
+      case "dark":
+        return {
+          active: "#0ea5e9",
+          inactive: "#d1d5db",
+          background: "#000000",
+        };
+      case "deuteranopia":
+        return {
+          active: "#007acc", // Azul seguro (em vez de verde)
+          inactive: "#999999",
+          background: "#ffffff",
+        };
+      case "protanopia":
+        return {
+          active: "#0088cc", // Verde-azulado mais neutro
+          inactive: "#aaaaaa",
+          background: "#ffffff",
+        };
+      case "tritanopia":
+        return {
+          active: "#d75a00", // Laranja visível pra quem tem tritanopia
+          inactive: "#888888",
+          background: "#ffffff",
+        };
+    }
+  })();
 
   return (
     <Tabs
@@ -84,6 +81,20 @@ export default function TabsLayout() {
           tabBarIcon: ({ focused, color }) => (
             <Ionicons
               name={focused ? "calendar" : "calendar-outline"}
+              size={20}
+              color={color}
+            />
+          ),
+        }}
+      />
+      <Tabs.Screen
+        name="historico"
+        options={{
+          headerShown: false,
+          tabBarLabel: "Histórico",
+          tabBarIcon: ({ focused, color }) => (
+            <Ionicons
+              name={focused ? "time-sharp" : "time-outline"} // ícone de histórico
               size={20}
               color={color}
             />

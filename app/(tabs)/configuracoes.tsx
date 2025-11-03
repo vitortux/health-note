@@ -1,79 +1,128 @@
+import ThemeBottomSheet from "@/components/ThemeBottomSheet";
 import { ThemeVariant, useConfig } from "@/context/ConfigContext";
-import { Dimensions, Text, TouchableOpacity, View } from "react-native";
-import { ContributionGraph } from "react-native-chart-kit";
+import BottomSheet from "@gorhom/bottom-sheet";
+import { Portal } from "@gorhom/portal";
+import { useEffect, useRef, useState } from "react";
+import { Switch, Text, TextInput, TouchableOpacity, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 
 export default function Configuracoes() {
   const { theme, setTheme } = useConfig();
+  const bottomSheetRef = useRef<BottomSheet>(null);
 
-  // Lista de todos os temas disponíveis
-  const themes: ThemeVariant[] = [
-    "light",
-    "dark",
-    "deuteranopia",
-    "protanopia",
-    "tritanopia",
-  ];
+  const [envioAtivo, setEnvioAtivo] = useState(false);
+  const [responsavelEmail, setResponsavelEmail] = useState("");
+  const [nomeUsuario, setNomeUsuario] = useState("");
 
-  // Calcula o próximo tema
-  const currentIndex = themes.indexOf(theme);
-  const nextTheme = themes[(currentIndex + 1) % themes.length];
+  const handleOpenPress = () => bottomSheetRef.current?.expand();
 
-  const commitsData = [
-    { date: "2017-01-02", count: 1 },
-    { date: "2017-01-03", count: 2 },
-    { date: "2017-01-04", count: 3 },
-    { date: "2017-01-05", count: 4 },
-    { date: "2017-01-06", count: 5 },
-    { date: "2017-01-30", count: 2 },
-    { date: "2017-01-31", count: 3 },
-    { date: "2017-03-01", count: 2 },
-    { date: "2017-04-02", count: 4 },
-    { date: "2017-03-05", count: 2 },
-    { date: "2017-02-30", count: 4 },
-  ];
+  const [erroEmail, setErroEmail] = useState("");
 
-  const chartConfig = {
-    backgroundGradientFrom: "#ffffff",
-    backgroundGradientTo: "#ffffff",
-    color: (opacity = 1) => `rgba(0, 122, 255, ${opacity})`,
-    strokeWidth: 2,
-    useShadowColorFromDataset: false,
-    propsForLabels: {
-      fontSize: 16, // aumenta o tamanho do texto
-      fontWeight: "bold", // opcional
-      fill: "#333333", // cor do texto
-    },
-  };
+  function getPrimaryColor(theme: ThemeVariant) {
+    switch (theme) {
+      case "dark":
+        return "#0ea5e9";
+      case "light":
+        return "#0ea5e9";
+      case "deuteranopia":
+        return "#007acc";
+      case "protanopia":
+        return "#0088cc";
+      case "tritanopia":
+        return "#d75a00";
+    }
+  }
+
+  useEffect(() => {
+    if (envioAtivo && responsavelEmail) {
+      const emailValido = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(responsavelEmail);
+      setErroEmail(emailValido ? "" : "E-mail inválido");
+    } else {
+      setErroEmail("");
+    }
+  }, [responsavelEmail, envioAtivo]);
 
   return (
-    <SafeAreaView className="flex-1 bg-background-base">
-      <View className="p-4 m-4 border border-primary rounded-md">
-        <Text className="text-main text-lg font-bold">Título Tematizado</Text>
-        <Text className="text-secondary mt-2">
-          Cor secundária para destaque
-        </Text>
-      </View>
-      <View className="m-4">
-        <TouchableOpacity
-          className="bg-primary py-3 px-4 rounded-md items-center"
-          onPress={() => setTheme(nextTheme)}
-        >
-          <Text className="text-main font-bold">Mudar para {nextTheme}</Text>
-        </TouchableOpacity>
-      </View>
-      <View className="m-4">
-        <Text className="text-main">Tema atual: {theme}</Text>
-      </View>
+    <View className="flex-1 bg-background">
+      <SafeAreaView className="flex-1 px-6 pt-10">
+        {/* Linha com label + switch */}
+        <View className="flex-row items-center justify-between mb-6">
+          <Text className="text-main text-xl font-semibold flex-shrink">
+            Envio automático de relatórios:
+          </Text>
+          <Switch
+            value={envioAtivo}
+            onValueChange={setEnvioAtivo}
+            thumbColor={envioAtivo ? "#fff" : "#e5e7eb"}
+            trackColor={{ false: "#374151", true: getPrimaryColor(theme) }}
+            style={{ transform: [{ scaleX: 1.4 }, { scaleY: 1.4 }] }}
+          />
+        </View>
 
-      <ContributionGraph
-        values={commitsData}
-        endDate={new Date()}
-        numDays={90} // últimos 3 meses
-        width={Dimensions.get("window").width - 32}
-        height={220}
-        chartConfig={chartConfig}
-      />
-    </SafeAreaView>
+        {/* Inputs sempre visíveis, mas desabilitados se envioAtivo for false */}
+        <View
+          style={{
+            opacity: envioAtivo ? 1 : 0.5,
+          }}
+        >
+          <View className="mb-6">
+            <Text className="text-main text-xl mb-2">Seu nome:</Text>
+            <TextInput
+              value={nomeUsuario}
+              onChangeText={setNomeUsuario}
+              placeholder="Digite seu nome"
+              editable={envioAtivo}
+              selectTextOnFocus={envioAtivo}
+              className="border border-card rounded-xl px-4 py-3 text-main text-xl bg-card"
+              placeholderTextColor={theme === "dark" ? "#fff" : "#1f2937"}
+            />
+          </View>
+
+          <View className="mb-2">
+            <Text className="text-main text-xl mb-2">E-mail do cuidador:</Text>
+            <TextInput
+              value={responsavelEmail}
+              onChangeText={setResponsavelEmail}
+              placeholder="Digite o e-mail do cuidador"
+              editable={envioAtivo}
+              selectTextOnFocus={envioAtivo}
+              className="border border-card rounded-xl px-4 py-3 text-main text-xl bg-card"
+              placeholderTextColor={theme === "dark" ? "#fff" : "#1f2937"}
+              keyboardType="email-address"
+              autoCapitalize="none"
+            />
+
+            <Text className="text-red-500 text-sm mt-1 min-h-[24px]">
+              {erroEmail || ""}
+            </Text>
+          </View>
+        </View>
+
+        {/* Seletor de tema */}
+        <View className="flex-row items-center justify-between mt-10">
+          <Text className="text-main text-xl">
+            Selecionar tema do aplicativo:
+          </Text>
+          <TouchableOpacity
+            className="px-6 py-3 rounded-xl justify-center border border-primary bg-primary h-16"
+            onPress={handleOpenPress}
+          >
+            <Text className="text-white text-center font-semibold text-lg">
+              {theme.charAt(0).toUpperCase() + theme.slice(1)}
+            </Text>
+          </TouchableOpacity>
+        </View>
+      </SafeAreaView>
+
+      <Portal>
+        <ThemeBottomSheet
+          ref={bottomSheetRef}
+          onSelectTheme={(newTheme) => {
+            setTheme(newTheme as ThemeVariant);
+            bottomSheetRef.current?.close();
+          }}
+        />
+      </Portal>
+    </View>
   );
 }
