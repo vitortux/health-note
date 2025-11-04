@@ -108,21 +108,46 @@ export const ThemeProvider = ({ children }: ConfigProviderProps) => {
   }
 
   async function setAutoSendEmailsAndSave(value: boolean) {
-    setAutoSendEmails(value);
-    await AsyncStorage.setItem("autoSendEmails", value.toString());
-
-    if (value) {
-      await scheduleDailyReportNotification();
-    } else {
+    // Sempre permite desativar
+    if (!value) {
+      setAutoSendEmails(false);
+      await AsyncStorage.setItem("autoSendEmails", "false");
       await cancelNotification("auto_email_report");
+      return;
     }
+
+    // Verifica se pode ativar
+    const email = responsavelEmail.trim();
+    const nome = nomeUsuario.trim();
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+
+    if (!email || !emailRegex.test(email)) {
+      throw new Error(
+        "É necessário cadastrar um e-mail válido antes de ativar o envio automático."
+      );
+    }
+
+    if (!nome) {
+      throw new Error(
+        "É necessário cadastrar o nome do usuário antes de ativar o envio automático."
+      );
+    }
+
+    // Tudo certo → ativa
+    setAutoSendEmails(true);
+    await AsyncStorage.setItem("autoSendEmails", "true");
+    await scheduleDailyReportNotification();
   }
 
   async function saveEmailAndName(email: string, nome: string) {
-    if (!email || !nome) throw new Error("Nome e e-mail são obrigatórios");
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-    if (!emailRegex.test(email)) throw new Error("E-mail inválido");
 
+    // Só valida se o campo tiver conteúdo
+    if (email.trim() && !emailRegex.test(email)) {
+      throw new Error("E-mail inválido");
+    }
+
+    // Pode salvar nome vazio (significa remover)
     setResponsavelEmail(email);
     setNomeUsuario(nome);
 

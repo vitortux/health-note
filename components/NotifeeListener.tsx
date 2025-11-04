@@ -18,8 +18,10 @@ export default function NotifeeListener() {
           ontem.setDate(ontem.getDate() - 1);
           const report = await gerarRelatorio(ontem);
           const savedEmail = await AsyncStorage.getItem("responsavelEmail");
+          const savedNome = await AsyncStorage.getItem("nomeUsuario");
           if (!savedEmail) return console.log("E-mail não definido.");
-          await sendRelatorio(report, savedEmail);
+          if (!savedNome) return console.log("E-mail não definido.");
+          await sendRelatorio(report, savedEmail, ontem, savedNome);
           // console.log("Vamos economizar e-mails :)");
         }
       }

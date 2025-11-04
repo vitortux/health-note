@@ -1,14 +1,17 @@
 import { EmailJSResponseStatus, send } from "@emailjs/react-native";
 import { format } from "date-fns";
+import { displayErrorNotification } from "./notifee";
 
-export async function sendRelatorio(relatorio: any, responsavelEmail: string) {
-  const ontem = new Date();
-  ontem.setDate(ontem.getDate() - 1);
-
-  let corpoEmail = `📅 Relatório diário - ${format(ontem, "dd/MM/yyyy")}\n\n`;
+export async function sendRelatorio(
+  relatorio: any,
+  responsavelEmail: string,
+  data: Date,
+  name: string
+) {
+  let corpoEmail = `📅 Relatório do usuário ${name} - ${format(data, "dd/MM/yyyy")}\n\n`;
 
   if (relatorio.length === 0) {
-    corpoEmail += "Nenhum medicamento programado para hoje.";
+    corpoEmail += "Nenhum medicamento programado para esta data.";
   } else {
     relatorio.forEach((item) => {
       corpoEmail += `${item.status} — ${item.nome} às ${item.hora}\n`;
@@ -36,5 +39,7 @@ export async function sendRelatorio(relatorio: any, responsavelEmail: string) {
     }
 
     console.log("ERRO ao enviar relatório: ", err);
+    await displayErrorNotification();
+    throw err;
   }
 }

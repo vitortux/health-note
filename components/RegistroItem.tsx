@@ -46,16 +46,13 @@ export function RegistroItem({ registro }: Readonly<RegistroItemProps>) {
       {/* Conteúdo textual */}
       <View className="flex-1">
         {/* Primeira linha: status + nome + dosagem */}
-        <Text
-          className="text-main font-semibold text-xl flex-shrink"
-          numberOfLines={1}
-        >
+        <Text className="text-main font-semibold text-xl flex-shrink">
           <Text className={`${statusColor} font-bold`}>{statusLabel}</Text>
           {` - "${registro.nome_medicamento}" — ${registro.dosagem} ${formatMeasure(registro.medida)}`}
         </Text>
 
         {/* Segunda linha: horários */}
-        <Text className="text-secondary text-base mt-1">
+        <Text className="text-label text-lg mt-1">
           Registro: {registro.hora_registro ?? "—"}, (previsto:{" "}
           {registro.hora_prevista ?? "—"})
         </Text>

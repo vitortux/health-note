@@ -26,11 +26,22 @@ async function requestUserPermission() {
 
 async function createChannelId() {
   const channelId = await notifee.createChannel({
-    id: "teste-teste",
+    id: "alarmes-health-note",
     name: "Medicamentos",
     vibration: true,
     importance: AndroidImportance.HIGH,
     sound: "alarme",
+  });
+
+  return channelId;
+}
+
+async function createLesserChannelId() {
+  const channelId = await notifee.createChannel({
+    id: "mensagens-health-note",
+    name: "Notificações",
+    vibration: true,
+    importance: AndroidImportance.HIGH,
   });
 
   return channelId;
@@ -91,7 +102,11 @@ export async function scheduleNotification(data: NotificationData) {
         dosagem: data.dosagem,
         medida: data.medida,
       },
-      android: { channelId, loopSound: true, ongoing: true },
+      android: {
+        channelId,
+        loopSound: true,
+        ongoing: true,
+      },
     },
     trigger
   );
@@ -102,12 +117,12 @@ export async function scheduleNotification(data: NotificationData) {
 export async function scheduleDailyReportNotification() {
   await requestUserPermission();
 
-  const now = new Date();
-  const triggerTime = new Date(now.getTime() + 60 * 1000);
+  const nextMidnight = new Date();
+  nextMidnight.setHours(24, 0, 0, 0);
 
   const trigger: TimestampTrigger = {
     type: TriggerType.TIMESTAMP,
-    timestamp: triggerTime.getTime(),
+    timestamp: nextMidnight.getTime(),
     repeatFrequency: RepeatFrequency.DAILY,
   };
 
@@ -124,4 +139,21 @@ export async function scheduleDailyReportNotification() {
   );
 
   return notifeeId;
+}
+
+export async function displayErrorNotification() {
+  await requestUserPermission();
+
+  const channelId = await createLesserChannelId();
+
+  await notifee.displayNotification({
+    id: "error_notification",
+    title: "Ocorreu um erro no envio de seu relatório",
+    body: "Verifique seus dados ou se possui conexão com a internet e tente novamente.",
+    android: {
+      channelId,
+      loopSound: true,
+      ongoing: true,
+    },
+  });
 }
