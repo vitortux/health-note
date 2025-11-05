@@ -31,7 +31,6 @@ export function useRegistroMedicamentosTable() {
       const result = await statement.executeAsync({
         $id_notifee: data.id_notifee,
 
-        // ✅ CORREÇÃO AQUI: Nomes dos placeholders e das propriedades de 'data'
         $data_registro: data.data_registro,
         $hora_registro: data.hora_registro,
         $hora_prevista: data.hora_prevista,
@@ -130,6 +129,29 @@ export function useRegistroMedicamentosTable() {
     });
   }
 
+  async function computeRegistrosNaoTomados(data: Date) {
+    const dataFormatada = format(data, "yyyy-MM-dd");
+    const diaSemana = data.getDay();
+    const horaAgora = format(new Date(), "HH:mm:ss");
+
+    const notificacoesOntem = await notificacoesTable.selectByDiaComRegistro(
+      diaSemana,
+      dataFormatada
+    );
+
+    for (const notif of notificacoesOntem) {
+      if (notif.tomado === null) {
+        await insert({
+          id_notifee: notif.id_notifee,
+          data: dataFormatada,
+          hora: horaAgora,
+          tomado: 0,
+        });
+        notif.tomado = 0;
+      }
+    }
+  }
+
   async function selectAllComDetalhes() {
     try {
       const query = `
@@ -198,5 +220,6 @@ export function useRegistroMedicamentosTable() {
     selectAllComDetalhes,
     selectByNotifee,
     update,
+    computeRegistrosNaoTomados,
   };
 }

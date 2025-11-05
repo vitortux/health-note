@@ -185,22 +185,26 @@ export default function CadastrarMedicamento() {
           // Atualizar a notificação do Notifee (caso seja necessário)
           await cancelNotification(existingNotificacao.id_notifee);
           await scheduleNotification({
-            title: `Hora do medicamento: ${nomeMedicamento}`,
-            body: `Tomar ${dosagem} ${selectedDose}`,
+            // title: `Hora do medicamento: ${nomeMedicamento}`,
+            // body: `Tomar ${dosagem} ${selectedDose}`,
             timestamp: target.getTime(),
             nome_medicamento: nomeMedicamento,
             dosagem: Number(dosagem),
             medida: selectedDose,
+            hora_prevista: `${hora.toString().padStart(2, "0")}:${minuto.toString().padStart(2, "0")}`,
+            imagem_uri: selectedImage!,
           });
         } else {
           // Se a notificação não existir, cria uma nova notificação
           const id_notifee = await scheduleNotification({
-            title: `Hora do medicamento: ${nomeMedicamento}`,
-            body: `Tomar ${dosagem} ${selectedDose}`,
+            // title: `Hora do medicamento: ${nomeMedicamento}`,
+            // body: `Tomar ${dosagem} ${selectedDose}`,
             timestamp: target.getTime(),
             nome_medicamento: nomeMedicamento,
             dosagem: Number(dosagem),
             medida: selectedDose,
+            hora_prevista: `${hora.toString().padStart(2, "0")}:${minuto.toString().padStart(2, "0")}`,
+            imagem_uri: selectedImage!,
           });
 
           // Cria a nova notificação no banco
@@ -244,12 +248,14 @@ export default function CadastrarMedicamento() {
         }
 
         const id_notifee = await scheduleNotification({
-          title: `Hora do medicamento: ${nomeMedicamento}`,
-          body: `Tomar ${dosagem} ${selectedDose}`,
+          // title: `Hora do medicamento: ${nomeMedicamento}`,
+          // body: `Tomar ${dosagem} ${selectedDose}`,
           timestamp: target.getTime(),
           nome_medicamento: nomeMedicamento,
           dosagem: Number(dosagem),
           medida: selectedDose,
+          hora_prevista: `${hora.toString().padStart(2, "0")}:${minuto.toString().padStart(2, "0")}`,
+          imagem_uri: selectedImage!,
         });
 
         await notificacoesTable.insert({

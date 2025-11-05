@@ -4,16 +4,19 @@ import notifee, {
   RepeatFrequency,
   TimestampTrigger,
   TriggerType,
+  AndroidStyle,
 } from "@notifee/react-native";
 
 interface NotificationData {
   id?: string;
+  timestamp?: number;
   title: string;
   body: string;
-  timestamp?: number;
   nome_medicamento: string;
   dosagem: number;
   medida: string;
+  hora_prevista: string;
+  imagem_uri: string;
 }
 
 async function requestUserPermission() {
@@ -69,11 +72,7 @@ export async function displayNotification(data: NotificationData) {
     id: data.id,
     title: data.title,
     body: data.body,
-    data: {
-      nome_medicamento: data.nome_medicamento,
-      dosagem: data.dosagem,
-      medida: data.medida,
-    },
+
     android: {
       channelId,
       loopSound: true,
@@ -93,19 +92,33 @@ export async function scheduleNotification(data: NotificationData) {
 
   const channelId = await createChannelId();
 
+  const notfTitle = `💊 Hora do medicamento: ${data.nome_medicamento}`;
+  const notfBody = `Tomar ${data.dosagem} ${data.medida} às ${data.hora_prevista}`;
+
   const notifeeId = await notifee.createTriggerNotification(
     {
-      title: data.title,
-      body: data.body,
+      title: notfTitle,
+      body: notfBody,
       data: {
         nome_medicamento: data.nome_medicamento,
         dosagem: data.dosagem,
         medida: data.medida,
+        hora_prevista: data.hora_prevista,
+        imagem_uri: data.imagem_uri,
       },
       android: {
         channelId,
         loopSound: true,
         ongoing: true,
+        style: {
+          type: AndroidStyle.BIGPICTURE,
+          picture: data.imagem_uri,
+        },
+        pressAction: {
+          id: "default",
+          launchActivity: "default",
+          mainComponent: "MainScreen",
+        },
       },
     },
     trigger
@@ -118,7 +131,8 @@ export async function scheduleDailyReportNotification() {
   await requestUserPermission();
 
   const nextMidnight = new Date();
-  nextMidnight.setHours(24, 0, 0, 0);
+  nextMidnight.setDate(nextMidnight.getDate() + 1);
+  nextMidnight.setHours(0, 1, 0, 0); // 00:01:00.000
 
   const trigger: TimestampTrigger = {
     type: TriggerType.TIMESTAMP,
@@ -133,7 +147,53 @@ export async function scheduleDailyReportNotification() {
       id: "auto_send_email",
       title: "Envio de relatório automático!",
       body: "Seu relatório está sendo enviado para o e-mail do seu responsável.",
-      android: { channelId, loopSound: true, ongoing: true },
+      android: {
+        channelId,
+        ongoing: true,
+        pressAction: {
+          id: "default",
+          launchActivity: "default",
+          mainComponent: "MainScreen",
+        },
+      },
+    },
+    trigger
+  );
+
+  return notifeeId;
+}
+
+export async function scheduleDailyComputeNotification() {
+  await requestUserPermission();
+
+  // Próxima meia-noite
+  const nextMidnight = new Date();
+  nextMidnight.setDate(nextMidnight.getDate() + 1);
+  nextMidnight.setHours(0, 1, 0, 0); // 00:01:00.000
+
+  const trigger: TimestampTrigger = {
+    type: TriggerType.TIMESTAMP,
+    timestamp: nextMidnight.getTime(),
+    repeatFrequency: RepeatFrequency.DAILY,
+  };
+
+  const channelId = await createChannelId();
+
+  // Criar notificação apenas para disparar o evento
+  const notifeeId = await notifee.createTriggerNotification(
+    {
+      id: "auto_compute_registros",
+      title: "Atualização automática",
+      body: "Processando dados do dia anterior...",
+      android: {
+        channelId,
+        ongoing: false,
+        pressAction: {
+          id: "default",
+          launchActivity: "default",
+          mainComponent: "MainScreen",
+        },
+      },
     },
     trigger
   );

@@ -35,32 +35,22 @@ export default function Notificacoes() {
 
   async function handleSubmit(notificacao: NotificacaoComRegistro) {
     const agora = new Date();
-    // Você renomeou data/hora no DB, mas o format continua o mesmo.
     const dataHoje = format(agora, "yyyy-MM-dd");
     const horaAgora = format(agora, "HH:mm");
 
-    let statusTomado = 1; // 1 = tomou normalmente
-    // A hora da notificação é a HORA PREVISTA
+    let statusTomado = 1;
     const horaPrevista = notificacao.hora;
 
-    // Calcula o statusTomado com base na hora prevista
     if (horaPrevista && horaAgora > horaPrevista) {
-      statusTomado = 2; // 2 = tomou com atraso
+      statusTomado = 2;
     }
 
     try {
       await registroTable.insert({
         id_notifee: notificacao.id_notifee,
-
-        // 1. Usa o novo nome da coluna de data
         data_registro: dataHoje,
-
-        // 2. Usa o novo nome da coluna de hora
         hora_registro: horaAgora,
-
-        // 3. NOVIDADE: Salva a hora prevista!
         hora_prevista: horaPrevista,
-
         tomado: statusTomado,
         nome_medicamento: notificacao.nome_medicamento,
         dosagem: notificacao.dosagem,

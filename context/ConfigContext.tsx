@@ -1,5 +1,6 @@
 import {
   cancelNotification,
+  scheduleDailyComputeNotification,
   scheduleDailyReportNotification,
 } from "@/utils/notifee";
 import AsyncStorage from "@react-native-async-storage/async-storage";
@@ -66,24 +67,19 @@ export const ThemeProvider = ({ children }: ConfigProviderProps) => {
       if (storedTheme) {
         setTheme(storedTheme);
 
-        if (storedTheme === "dark") {
-          setStatusBarStyle("light", false);
-        } else if (storedTheme === "light") {
-          setStatusBarStyle("dark", false);
-        } else if (storedTheme === "deuteranopia") {
-          setStatusBarStyle("dark", false);
-        } else if (storedTheme === "protanopia") {
-          setStatusBarStyle("dark", false);
-        } else if (storedTheme === "tritanopia") {
-          setStatusBarStyle("dark", false);
-        }
+        if (storedTheme === "dark") setStatusBarStyle("light", false);
+        else setStatusBarStyle("dark", false);
       }
 
-      if (storedAutoSend) {
-        setAutoSendEmails(storedAutoSend === "true");
-        if (storedAutoSend === "true") await scheduleDailyReportNotification();
-      } else if (autoSendEmails) {
-        await scheduleDailyReportNotification();
+      const autoSend = storedAutoSend === "true";
+      setAutoSendEmails(autoSend);
+
+      if (autoSend) {
+        await scheduleDailyReportNotification(); // agenda envio de relatório
+        await cancelNotification("auto_compute_registros"); // garante que a outra não fique ativa
+      } else {
+        await scheduleDailyComputeNotification(); // agenda apenas contabilização
+        await cancelNotification("auto_send_email"); // garante que a de e-mail não fique ativa
       }
     }
 
@@ -108,15 +104,14 @@ export const ThemeProvider = ({ children }: ConfigProviderProps) => {
   }
 
   async function setAutoSendEmailsAndSave(value: boolean) {
-    // Sempre permite desativar
     if (!value) {
       setAutoSendEmails(false);
       await AsyncStorage.setItem("autoSendEmails", "false");
-      await cancelNotification("auto_email_report");
+      await cancelNotification("auto_send_email");
+      await scheduleDailyComputeNotification();
       return;
     }
 
-    // Verifica se pode ativar
     const email = responsavelEmail.trim();
     const nome = nomeUsuario.trim();
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
@@ -133,21 +128,19 @@ export const ThemeProvider = ({ children }: ConfigProviderProps) => {
       );
     }
 
-    // Tudo certo → ativa
     setAutoSendEmails(true);
     await AsyncStorage.setItem("autoSendEmails", "true");
+    await cancelNotification("auto_compute_registros");
     await scheduleDailyReportNotification();
   }
 
   async function saveEmailAndName(email: string, nome: string) {
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
-    // Só valida se o campo tiver conteúdo
     if (email.trim() && !emailRegex.test(email)) {
       throw new Error("E-mail inválido");
     }
 
-    // Pode salvar nome vazio (significa remover)
     setResponsavelEmail(email);
     setNomeUsuario(nome);
 
