@@ -4,11 +4,13 @@ import { Image, Text, TouchableOpacity, View } from "react-native";
 type Props = {
   notificacao: NotificacaoComRegistro;
   onPressTomado?: () => void;
+  onPressCard?: () => void;
 };
 
 export default function NotificacaoCard({
   notificacao,
   onPressTomado,
+  onPressCard,
 }: Readonly<Props>) {
   function getStatus() {
     if (notificacao.tomado) return "tomado";
@@ -19,14 +21,12 @@ export default function NotificacaoCard({
     horario.setHours(Number(horaStr), Number(minutoStr), 0, 0);
 
     const diffMinutos = (agora.getTime() - horario.getTime()) / 1000 / 60;
-
     if (diffMinutos > 15) return "atrasado";
     return "previsto";
   }
 
   const status = getStatus();
 
-  // Define label e cores de status
   let labelColor, labelText;
   switch (status) {
     case "tomado":
@@ -42,20 +42,24 @@ export default function NotificacaoCard({
       labelText = "PENDENTE";
   }
 
-  // Define cor e desabilitação do botão
   const isTomado = status === "tomado";
   const buttonColor = isTomado ? "bg-gray-400" : "bg-sky-500";
 
   return (
     <View className="flex-row justify-between items-center py-6 px-4 rounded-3xl mb-4 bg-card">
-      <View className="flex-row items-center">
+      {/* Toda a área informativa é clicável (abrir imagem) */}
+      <TouchableOpacity
+        className="flex-row items-center flex-1 mr-4"
+        activeOpacity={0.8}
+        onPress={onPressCard}
+      >
         {notificacao.imagem_uri && (
           <Image
             source={{ uri: notificacao.imagem_uri }}
             className="w-16 h-16 rounded-xl mr-4"
           />
         )}
-        <View>
+        <View className="flex-1">
           <Text className="text-main font-semibold text-3xl">
             {notificacao.nome_medicamento}
           </Text>
@@ -63,7 +67,6 @@ export default function NotificacaoCard({
             {notificacao.dosagem} {notificacao.medida}, às {notificacao.hora}
           </Text>
 
-          {/* Label de status */}
           <View
             className={`self-start mt-2 px-3 py-1 rounded-full ${labelColor}`}
           >
@@ -72,11 +75,19 @@ export default function NotificacaoCard({
             </Text>
           </View>
         </View>
-      </View>
+      </TouchableOpacity>
 
-      {/* Botão de ação */}
+      {/* Botão separado para "Tomar" */}
       <TouchableOpacity
-        onPress={!isTomado ? onPressTomado : undefined}
+        onPress={async () => {
+          if (!isTomado) {
+            try {
+              await onPressTomado?.();
+            } catch (error) {
+              alert("Erro ao marcar como tomado: " + error);
+            }
+          }
+        }}
         disabled={isTomado}
         className={`px-4 py-2 rounded-full ${buttonColor} ${
           isTomado ? "opacity-60" : "active:opacity-80"

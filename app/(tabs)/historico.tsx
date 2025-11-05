@@ -1,7 +1,9 @@
+import ImagemBottomSheet from "@/components/ImagemBottomSheet";
 import { RegistroItem } from "@/components/RegistroItem";
 import { useRegistroMedicamentosTable } from "@/hooks/useRegistroMedicamentosTable";
+import BottomSheet from "@gorhom/bottom-sheet";
 import { useNavigation } from "@react-navigation/native";
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import { FlatList, Text, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 
@@ -12,6 +14,16 @@ export default function Historico() {
   const [registrosAgrupados, setRegistrosAgrupados] = useState<
     Record<string, any[]>
   >({});
+
+  const [imagemSelecionada, setImagemSelecionada] = useState<string | null>(
+    null
+  );
+  const bottomSheetRef = useRef<BottomSheet>(null);
+
+  function handleAbrirImagem(uri: string) {
+    setImagemSelecionada(uri);
+    bottomSheetRef.current?.expand();
+  }
 
   useEffect(() => {
     async function carregarHistorico() {
@@ -64,11 +76,19 @@ export default function Historico() {
               {data}
             </Text>
             {registrosAgrupados[data].map((registro) => (
-              <RegistroItem key={registro.id_registro} registro={registro} />
+              <RegistroItem
+                key={registro.id_registro}
+                registro={registro}
+                onPressImagem={() =>
+                  registro.imagem_uri && handleAbrirImagem(registro.imagem_uri)
+                }
+              />
             ))}
           </View>
         )}
       />
+
+      <ImagemBottomSheet ref={bottomSheetRef} imagemUri={imagemSelecionada} />
     </SafeAreaView>
   );
 }

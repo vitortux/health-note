@@ -102,20 +102,6 @@ export default function TabsLayout() {
         }}
       />
       <Tabs.Screen
-        name="debug"
-        options={{
-          headerShown: false,
-          tabBarLabel: "Debug",
-          tabBarIcon: ({ focused, color }) => (
-            <Ionicons
-              name={focused ? "code-slash" : "code-outline"}
-              size={20}
-              color={color}
-            />
-          ),
-        }}
-      />
-      <Tabs.Screen
         name="configuracoes"
         options={{
           headerShown: false,

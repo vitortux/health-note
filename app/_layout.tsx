@@ -7,6 +7,7 @@ import { GestureHandlerRootView } from "react-native-gesture-handler";
 import { SafeAreaProvider } from "react-native-safe-area-context";
 
 import NotifeeListener from "@/components/NotifeeListener";
+import { StatusBar } from "expo-status-bar";
 import "../global.css";
 
 export default function RootLayout() {
@@ -17,6 +18,7 @@ export default function RootLayout() {
           <PortalProvider>
             <SQLiteProvider databaseName="app.db" onInit={initialize}>
               <NotifeeListener />
+              <StatusBar style="dark" />
               <Stack>
                 <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
                 <Stack.Screen

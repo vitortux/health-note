@@ -33,6 +33,37 @@ export function useNotificacoesTable() {
     }
   }
 
+  async function update(data: {
+    new_id_notifee?: string;
+    id_notifee: string;
+    hora: string;
+    dia: number;
+  }) {
+    // Preparando a instrução SQL para atualizar a notificação
+    const statement = await database.prepareAsync(
+      "UPDATE notificacoes SET hora = $hora, dia = $dia, id_notifee = $new_id_notifee WHERE id_notifee = $id_notifee"
+    );
+
+    try {
+      const newIdNotifee = data.new_id_notifee || data.id_notifee; // Se houver um novo id_notifee, usamos ele, caso contrário, mantemos o antigo
+
+      // Executando a atualização no banco
+      await statement.executeAsync({
+        $id_notifee: data.id_notifee, // id_notifee antigo
+        $new_id_notifee: newIdNotifee, // novo id_notifee
+        $hora: data.hora,
+        $dia: data.dia,
+      });
+
+      return { id_notifee: newIdNotifee }; // Retorna o id atualizado
+    } catch (error) {
+      console.log("Erro ao atualizar notificação:", error);
+      throw error;
+    } finally {
+      await statement.finalizeAsync();
+    }
+  }
+
   async function deleteByMedicamentoId(id_medicamento: number) {
     try {
       await database.runAsync(
@@ -103,7 +134,7 @@ export function useNotificacoesTable() {
         JOIN medicamentos m ON n.id_medicamento = m.id_medicamento
         LEFT JOIN registro_medicamentos r
           ON n.id_notifee = r.id_notifee
-          AND r.data = ?
+          AND r.data_registro = ?
         WHERE n.dia = ?
         ORDER BY n.hora ASC
       `;
@@ -216,6 +247,7 @@ export function useNotificacoesTable() {
 
   return {
     insert,
+    update,
     deleteByMedicamentoId,
     select,
     selectByDia,
