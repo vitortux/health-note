@@ -72,59 +72,99 @@ export function useRegistroMedicamentosTable() {
     }
   }
 
-  async function selectRegistrosByDate(data: string) {
-    const query = `
-      SELECT 
-        nome_medicamento,
-        hora_registro,
-        hora_prevista,
-        tomado
-      FROM registro_medicamentos
-      WHERE data_registro = ?
-      ORDER BY hora_registro ASC;
-    `;
-    const response = await database.getAllAsync(query, [data]);
-    return response;
+  async function selectByDate(data: Date): Promise<RegistroMedicamento[]> {
+    const dataFormatada = format(data, "yyyy-MM-dd");
+
+    try {
+      const result = await database.getAllAsync<RegistroMedicamento>(
+        `
+            SELECT * FROM registro_medicamentos 
+            WHERE data_registro = ?
+            ORDER BY hora_prevista ASC;
+            `,
+        [dataFormatada]
+      );
+
+      return result;
+    } catch (error) {
+      console.error("Erro ao selecionar registros por data:", error);
+      return [];
+    }
   }
 
-  // Tem que tirar as informações só dessa tabela, e tem que fazer alguma coisa com o relatório manual/relatório
-  // automático por conta dessa parada de ciclo. Quando vc faz um manual, ele não deve inserir o restante como não tomado,
-  // só pegar os registros até agora... Tô pensando em separar em duas funções separadas, amanhã vejo isso
+  async function gerarRelatorioManual(data: Date) {
+    const dataFormatada = format(data, "yyyy-MM-dd");
+
+    const registrosDoDia = await selectByDate(data);
+
+    if (!registrosDoDia || registrosDoDia.length === 0) {
+      console.log(`Nenhum registro encontrado para a data: ${dataFormatada}`);
+      return [];
+    }
+
+    return registrosDoDia.map((registro) => {
+      let status: string;
+
+      if (registro.tomado === 1) {
+        status = "✅ Tomado";
+      } else if (registro.tomado === 2) {
+        status = "⚠️ Tomado com atraso";
+      } else if (registro.tomado === 0) {
+        status = "❌ Não tomado";
+      } else {
+        status = "Status Desconhecido";
+      }
+
+      return {
+        nome: registro.nome_medicamento,
+        hora_prevista: registro.hora_prevista, // CORRIGIDO para hora_prevista
+        status: status,
+        hora_registro: registro.hora_registro, // CORRIGIDO para hora_registro
+      };
+    });
+  }
+
   async function gerarRelatorio(data: Date) {
     const dataFormatada = format(data, "yyyy-MM-dd");
     const diaSemana = data.getDay();
     const horaAgora = format(new Date(), "HH:mm:ss");
 
-    const notificacoesOntem = await notificacoesTable.selectByDiaComRegistro(
-      diaSemana,
-      dataFormatada
-    );
+    const notificacoesParaComputar =
+      await notificacoesTable.selectByDiaComRegistro(diaSemana, dataFormatada);
 
-    for (const notif of notificacoesOntem) {
+    for (const notif of notificacoesParaComputar) {
       if (notif.tomado === null) {
         await insert({
           id_notifee: notif.id_notifee,
-          data: dataFormatada,
-          hora: horaAgora,
+          data_registro: dataFormatada,
+          hora_registro: horaAgora,
+          hora_prevista: notif.hora,
           tomado: 0,
+          nome_medicamento: notif.nome_medicamento,
+          dosagem: notif.dosagem,
+          medida: notif.medida,
+          imagem_uri: notif.imagem_uri || null,
         });
-        notif.tomado = 0;
       }
     }
 
-    return notificacoesOntem.map((notif) => {
+    const registrosFinais = await selectByDate(data);
+
+    return registrosFinais.map((registro) => {
       let status;
-      if (notif.tomado === 1) {
+      if (registro.tomado === 1) {
         status = "✅ Tomado";
-      } else if (notif.tomado === 2) {
+      } else if (registro.tomado === 2) {
         status = "⚠️ Tomado com atraso";
       } else {
         status = "❌ Não tomado";
       }
+
       return {
-        nome: notif.nome_medicamento,
-        hora: notif.hora,
-        status,
+        nome: registro.nome_medicamento,
+        hora_prevista: registro.hora_prevista, // CORRIGIDO para hora_prevista
+        status: status,
+        hora_registro: registro.hora_registro, // CORRIGIDO para hora_registro
       };
     });
   }
@@ -143,9 +183,14 @@ export function useRegistroMedicamentosTable() {
       if (notif.tomado === null) {
         await insert({
           id_notifee: notif.id_notifee,
-          data: dataFormatada,
-          hora: horaAgora,
+          data_registro: dataFormatada,
+          hora_registro: horaAgora,
+          hora_prevista: notif.hora,
           tomado: 0,
+          nome_medicamento: notif.nome_medicamento,
+          dosagem: notif.dosagem,
+          medida: notif.medida,
+          imagem_uri: notif.imagem_uri || null,
         });
         notif.tomado = 0;
       }
@@ -221,5 +266,6 @@ export function useRegistroMedicamentosTable() {
     selectByNotifee,
     update,
     computeRegistrosNaoTomados,
+    gerarRelatorioManual,
   };
 }

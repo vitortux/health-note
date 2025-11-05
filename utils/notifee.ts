@@ -130,9 +130,12 @@ export async function scheduleNotification(data: NotificationData) {
 export async function scheduleDailyReportNotification() {
   await requestUserPermission();
 
+  const now = new Date();
   const nextMidnight = new Date();
-  nextMidnight.setDate(nextMidnight.getDate() + 1);
-  nextMidnight.setHours(0, 1, 0, 0); // 00:01:00.000
+
+  // Ajusta para amanhã às 00:01
+  nextMidnight.setDate(now.getDate() + 1);
+  nextMidnight.setHours(0, 0, 0, 0);
 
   const trigger: TimestampTrigger = {
     type: TriggerType.TIMESTAMP,
@@ -140,7 +143,7 @@ export async function scheduleDailyReportNotification() {
     repeatFrequency: RepeatFrequency.DAILY,
   };
 
-  const channelId = await createChannelId();
+  const channelId = await createLesserChannelId();
 
   const notifeeId = await notifee.createTriggerNotification(
     {
@@ -166,10 +169,12 @@ export async function scheduleDailyReportNotification() {
 export async function scheduleDailyComputeNotification() {
   await requestUserPermission();
 
-  // Próxima meia-noite
+  const now = new Date();
   const nextMidnight = new Date();
-  nextMidnight.setDate(nextMidnight.getDate() + 1);
-  nextMidnight.setHours(0, 1, 0, 0); // 00:01:00.000
+
+  // Ajusta para amanhã às 00:01
+  nextMidnight.setDate(now.getDate() + 1);
+  nextMidnight.setHours(0, 0, 0, 0);
 
   const trigger: TimestampTrigger = {
     type: TriggerType.TIMESTAMP,
@@ -177,7 +182,7 @@ export async function scheduleDailyComputeNotification() {
     repeatFrequency: RepeatFrequency.DAILY,
   };
 
-  const channelId = await createChannelId();
+  const channelId = await createLesserChannelId();
 
   // Criar notificação apenas para disparar o evento
   const notifeeId = await notifee.createTriggerNotification(

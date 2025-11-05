@@ -14,7 +14,7 @@ export async function sendRelatorio(
     corpoEmail += "Nenhum medicamento programado para esta data.";
   } else {
     relatorio.forEach((item) => {
-      corpoEmail += `${item.status} — ${item.nome} às ${item.hora}\n`;
+      corpoEmail += `${item.status}: Medicamento "${item.nome}", previsto p/ ${item.hora_prevista}. Registro às ${item.hora_registro}.\n`;
     });
   }
 

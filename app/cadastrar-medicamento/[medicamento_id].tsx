@@ -134,7 +134,6 @@ export default function CadastrarMedicamento() {
 
   async function update() {
     try {
-      // Atualiza os dados do medicamento no banco
       await medicamentosTable.update({
         id_medicamento: Number(params.medicamento_id),
         nome_medicamento: nomeMedicamento,
@@ -143,80 +142,49 @@ export default function CadastrarMedicamento() {
         imagem_uri: selectedImage!,
       });
 
-      // Buscar as notificações existentes para este medicamento
       const oldNotificacoes = await notificacoesTable.selectByMedicamentoId(
         Number(params.medicamento_id)
       );
 
-      // Agora, vamos criar ou atualizar notificações
-      for (const diaSemana of diasSelecionados) {
-        // Verifica se já existe uma notificação agendada para esse dia
-        const existingNotificacao = oldNotificacoes.find(
-          (notificacao) => notificacao.dia === diaSemana
-        );
+      for (const n of oldNotificacoes) {
+        await cancelNotification(n.id_notifee);
+      }
 
+      await notificacoesTable.deleteByMedicamentoId(
+        Number(params.medicamento_id)
+      );
+
+      for (const diaSemana of diasSelecionados) {
         const now = new Date();
         const target = new Date();
         target.setHours(hora, minuto, 0, 0);
 
-        // Calcula a diferença de dias para o próximo dia da semana selecionado
         const diff = (diaSemana + 7 - now.getDay()) % 7;
         if (diff === 0 && target <= now) {
-          target.setDate(target.getDate() + 7); // Se o horário já passou, agendar para a próxima semana
+          target.setDate(target.getDate() + 7);
         } else {
           target.setDate(target.getDate() + diff);
         }
 
-        if (existingNotificacao) {
-          // Se a notificação já existe, atualiza a notificação e os registros
-          await notificacoesTable.update({
-            id_notifee: existingNotificacao.id_notifee, // Atualiza a notificação existente
-            id_medicamento: Number(params.medicamento_id),
-            hora: `${hora.toString().padStart(2, "0")}:${minuto.toString().padStart(2, "0")}`,
-            dia: diaSemana,
-          });
+        const id_notifee = await scheduleNotification({
+          // title: `Hora do medicamento: ${nomeMedicamento}`,
+          // body: `Tomar ${dosagem} ${selectedDose}`,
+          timestamp: target.getTime(),
+          nome_medicamento: nomeMedicamento,
+          dosagem: Number(dosagem),
+          medida: selectedDose,
+          hora_prevista: `${hora.toString().padStart(2, "0")}:${minuto.toString().padStart(2, "0")}`,
+          imagem_uri: selectedImage!,
+        });
 
-          // Atualiza os registros com o novo horário
-          await registroTable.update(
-            existingNotificacao.id_notifee, // id_notifeeAntigo
-            existingNotificacao.id_notifee // id_notifeeNovo (use a novo id_notifee if changed)
-          );
-
-          // Atualizar a notificação do Notifee (caso seja necessário)
-          await cancelNotification(existingNotificacao.id_notifee);
-          await scheduleNotification({
-            // title: `Hora do medicamento: ${nomeMedicamento}`,
-            // body: `Tomar ${dosagem} ${selectedDose}`,
-            timestamp: target.getTime(),
-            nome_medicamento: nomeMedicamento,
-            dosagem: Number(dosagem),
-            medida: selectedDose,
-            hora_prevista: `${hora.toString().padStart(2, "0")}:${minuto.toString().padStart(2, "0")}`,
-            imagem_uri: selectedImage!,
-          });
-        } else {
-          // Se a notificação não existir, cria uma nova notificação
-          const id_notifee = await scheduleNotification({
-            // title: `Hora do medicamento: ${nomeMedicamento}`,
-            // body: `Tomar ${dosagem} ${selectedDose}`,
-            timestamp: target.getTime(),
-            nome_medicamento: nomeMedicamento,
-            dosagem: Number(dosagem),
-            medida: selectedDose,
-            hora_prevista: `${hora.toString().padStart(2, "0")}:${minuto.toString().padStart(2, "0")}`,
-            imagem_uri: selectedImage!,
-          });
-
-          // Cria a nova notificação no banco
-          await notificacoesTable.insert({
-            id_notifee,
-            id_medicamento: Number(params.medicamento_id),
-            hora: `${hora.toString().padStart(2, "0")}:${minuto.toString().padStart(2, "0")}`,
-            dia: diaSemana,
-          });
-
-          // Não há necessidade de atualizar os registros agora, porque eles serão criados quando o medicamento for tomado
-        }
+        await notificacoesTable.insert({
+          id_notifee,
+          id_medicamento: Number(params.medicamento_id),
+          hora: `${hora.toString().padStart(2, "0")}:${minuto
+            .toString()
+            .padStart(2, "0")}`,
+          dia: diaSemana,
+        });
       }
 
       alert("Medicamento e notificações salvos!");

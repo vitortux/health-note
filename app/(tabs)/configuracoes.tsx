@@ -48,7 +48,7 @@ export default function Configuracoes() {
     nomeUsuario: savedNome,
   } = useConfig();
 
-  const { gerarRelatorio } = useRegistroMedicamentosTable();
+  const { gerarRelatorioManual } = useRegistroMedicamentosTable();
   const bottomSheetRef = useRef<BottomSheet>(null);
 
   const [mostrarDatePicker, setMostrarDatePicker] = useState(false);
@@ -106,7 +106,7 @@ export default function Configuracoes() {
     setErroRelatorio(""); // reset antes de enviar
 
     try {
-      const relatorio = await gerarRelatorio(dataSelecionada);
+      const relatorio = await gerarRelatorioManual(dataSelecionada);
       await sendRelatorio(
         relatorio,
         responsavelEmail,
