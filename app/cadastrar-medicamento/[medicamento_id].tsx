@@ -13,6 +13,7 @@ import * as ImagePicker from "expo-image-picker";
 import { router, useLocalSearchParams } from "expo-router";
 import { useRef, useState } from "react";
 import {
+  Alert,
   Image,
   ScrollView,
   Text,
@@ -245,25 +246,44 @@ export default function CadastrarMedicamento() {
   }
 
   async function deleteById() {
-    try {
-      await medicamentosTable.deleteById(Number(params.medicamento_id));
+    Alert.alert(
+      "Confirmação",
+      "Tem certeza que deseja deletar este medicamento?",
+      [
+        {
+          text: "Cancelar",
+          style: "cancel",
+        },
+        {
+          text: "Deletar",
+          style: "destructive",
+          onPress: async () => {
+            try {
+              const oldNotificacoes =
+                await notificacoesTable.selectByMedicamentoId(
+                  Number(params.medicamento_id)
+                );
 
-      const oldNotificacoes = await notificacoesTable.selectByMedicamentoId(
-        Number(params.medicamento_id)
-      );
+              for (const n of oldNotificacoes) {
+                console.log(n.id_notifee);
+                await cancelNotification(n.id_notifee);
+              }
 
-      for (const n of oldNotificacoes) {
-        await cancelNotification(n.id_notifee);
-      }
+              await medicamentosTable.deleteById(Number(params.medicamento_id));
 
-      await notificacoesTable.deleteByMedicamentoId(
-        Number(params.medicamento_id)
-      );
-      alert("Medicamento deletado!");
-      router.back();
-    } catch (error) {
-      console.log("Erro ao deletar medicamento:", error);
-    }
+              await notificacoesTable.deleteByMedicamentoId(
+                Number(params.medicamento_id)
+              );
+
+              alert("Medicamento deletado!");
+              router.back();
+            } catch (error) {
+              console.log("Erro ao deletar medicamento:", error);
+            }
+          },
+        },
+      ]
+    );
   }
 
   return (
@@ -324,7 +344,7 @@ export default function CadastrarMedicamento() {
                 >
                   <Image
                     source={{ uri: selectedImage }}
-                    style={{ width: 150, height: 150, borderRadius: 12 }}
+                    style={{ width: 300, height: 300, borderRadius: 12 }}
                     resizeMode="contain"
                   />
                   <Text className="text-label text-center text-lg mt-2">

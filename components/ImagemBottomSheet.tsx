@@ -14,7 +14,7 @@ interface ImagemBottomSheetProps {
 
 const ImagemBottomSheet = forwardRef<Ref, ImagemBottomSheetProps>(
   function ImagemBottomSheet({ imagemUri }, ref) {
-    const snapPoints = useMemo(() => ["50%", "80%"], []);
+    const snapPoints = useMemo(() => ["50%", "90%"], []);
     const { theme } = useConfig();
 
     const renderBackdrop = useCallback(
@@ -42,13 +42,16 @@ const ImagemBottomSheet = forwardRef<Ref, ImagemBottomSheetProps>(
           backgroundColor: theme === "dark" ? "#fff" : "#000",
         }}
       >
-        <BottomSheetView className="flex-1 justify-center items-center bg-card">
+        <BottomSheetView
+          style={{ height: "100%" }}
+          className="flex-1 items-center"
+        >
           <Text className="text-main font-bold text-2xl mb-4">
             Imagem do medicamento
           </Text>
           <Image
             source={{ uri: imagemUri }}
-            className="w-full h-80 rounded-2xl" // agora ocupa toda a largura e altura maior
+            className="w-full h-full rounded-[18px]" // agora ocupa toda a largura e altura maior
             resizeMode="contain"
           />
         </BottomSheetView>
