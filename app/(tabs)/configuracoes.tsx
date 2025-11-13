@@ -46,6 +46,7 @@ export default function Configuracoes() {
     autoSendEmails,
     responsavelEmail: savedEmail,
     nomeUsuario: savedNome,
+    clearEmailAndName,
   } = useConfig();
 
   const { gerarRelatorioManual } = useRegistroMedicamentosTable();
@@ -70,9 +71,15 @@ export default function Configuracoes() {
   // Salvar nome e e-mail
   async function handleSubmit() {
     setErroEmail("");
+
     try {
-      await saveEmailAndName(responsavelEmail, nomeUsuario);
-      Alert.alert("Sucesso", "Configurações salvas com sucesso!");
+      if (responsavelEmail || nomeUsuario) {
+        await saveEmailAndName(responsavelEmail, nomeUsuario);
+        Alert.alert("Sucesso", "Configurações salvas com sucesso!");
+      } else {
+        await clearEmailAndName();
+        Alert.alert("Sucesso", "Dados removidos com sucesso!");
+      }
     } catch (err: any) {
       setErroEmail(err.message || "Ocorreu um erro ao salvar.");
     }
@@ -228,7 +235,7 @@ export default function Configuracoes() {
 
             {/* Label de erro unificada para configuração */}
             {erroEmail ? (
-              <Text className="text-red-500 text-lg mt-1 min-h-[24px]">
+              <Text className="text-danger text-lg mt-1 min-h-[24px]">
                 {erroEmail}
               </Text>
             ) : null}
@@ -304,7 +311,7 @@ export default function Configuracoes() {
 
           {/* Label de erro para envio manual */}
           {erroRelatorio ? (
-            <Text className="text-red-500 text-lg mt-1 min-h-[24px]">
+            <Text className="text-danger text-lg mt-1 min-h-[24px]">
               {erroRelatorio}
             </Text>
           ) : null}
@@ -312,7 +319,7 @@ export default function Configuracoes() {
           {/* Botão para limpar todos os dados */}
           <View className="border-t border-card pt-6 mt-6">
             <TouchableOpacity
-              className="bg-red-500 py-3 rounded-xl items-center"
+              className="bg-danger py-3 rounded-xl items-center"
               onPress={handleClearDatabase}
             >
               <Text className="text-white font-semibold text-lg">

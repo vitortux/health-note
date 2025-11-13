@@ -30,6 +30,7 @@ export interface ConfigContextProps {
   responsavelEmail: string;
   nomeUsuario: string;
   saveEmailAndName: (email: string, nome: string) => void;
+  clearEmailAndName: () => void;
 }
 
 const ConfigContext = createContext<ConfigContextProps>({
@@ -40,6 +41,7 @@ const ConfigContext = createContext<ConfigContextProps>({
   responsavelEmail: "",
   nomeUsuario: "",
   saveEmailAndName: () => {},
+  clearEmailAndName: () => {},
 });
 
 export const useConfig = (): ConfigContextProps => useContext(ConfigContext);
@@ -141,11 +143,25 @@ export const ThemeProvider = ({ children }: ConfigProviderProps) => {
       throw new Error("E-mail inválido");
     }
 
+    if (!nome) {
+      throw new Error(
+        "É necessário cadastrar o nome do usuário antes de ativar o envio automático."
+      );
+    }
+
     setResponsavelEmail(email);
     setNomeUsuario(nome);
 
     await AsyncStorage.setItem("responsavelEmail", email);
     await AsyncStorage.setItem("nomeUsuario", nome);
+  }
+
+  async function clearEmailAndName() {
+    setResponsavelEmail("");
+    setNomeUsuario("");
+
+    await AsyncStorage.removeItem("responsavelEmail");
+    await AsyncStorage.removeItem("nomeUsuario");
   }
 
   const contextValue: ConfigContextProps = {
@@ -156,6 +172,7 @@ export const ThemeProvider = ({ children }: ConfigProviderProps) => {
     responsavelEmail,
     nomeUsuario,
     saveEmailAndName,
+    clearEmailAndName,
   };
 
   return (

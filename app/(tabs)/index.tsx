@@ -77,7 +77,7 @@ export default function Home() {
               }`}
             </Text>
             <Text className="text-label text-lg text-center">
-              {`previso p/ ${proximoMedicamento.data}, ${proximoMedicamento.hora}`}
+              {`previsto p/ ${proximoMedicamento.data}, ${proximoMedicamento.hora}`}
             </Text>
           </>
         ) : (

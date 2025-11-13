@@ -10,6 +10,9 @@
   --color-label: #374151; /* Usado em labels */
   --color-background: #fff; /* Background da página */
   --color-card-background: #f3f4f6; /* Usado em cards */
+  --color-fine: #22c55e;
+  --color-alert: #eab308;
+  --color-danger: #ef4444;
 }
 
 .dark {
@@ -19,6 +22,9 @@
   --color-label: #e5e7eb; /* Labels */
   --color-background: #000000; /* Fundo totalmente preto */
   --color-card-background: #1a1a1a; /* Fundo de cards quase preto */
+  --color-fine: #22c55e;
+  --color-alert: #eab308;
+  --color-danger: #ef4444;
 }
 
 /* Tema para Deuteranopia (verde-vermelho) */
@@ -29,6 +35,9 @@
   --color-label: #3c4043;
   --color-background: #ffffff;
   --color-card-background: #f3f4f6;
+  --color-fine: #21a179; /* Verde azulado, visível */
+  --color-alert: #fbbf24; /* Amarelo vibrante */
+  --color-danger: #d62828; /* Vermelho escuro para contraste */
 }
 
 /* Tema para Protanopia (vermelho) */
@@ -39,6 +48,9 @@
   --color-label: #3c4043;
   --color-background: #ffffff;
   --color-card-background: #f3f4f6;
+  --color-fine: #22c55e; /* Verde ainda funciona */
+  --color-alert: #fbbf24; /* Amarelo intenso */
+  --color-danger: #ff6f61; /* Laranja/vermelho perceptível */
 }
 
 /* Tema para Tritanopia (azul-amarelo) */
@@ -49,4 +61,7 @@
   --color-label: #3c3c3c;
   --color-background: #ffffff;
   --color-card-background: #f3f4f6;
+  --color-fine: #0f766e; /* Verde-azulado escuro */
+  --color-alert: #f59e0b; /* Laranja mais intenso */
+  --color-danger: #d14343; /* Vermelho escuro perceptível */
 }

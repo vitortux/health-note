@@ -41,8 +41,16 @@ export default function Notificacoes() {
     let statusTomado = 1;
     const horaPrevista = notificacao.hora;
 
-    if (horaPrevista && horaAgora > horaPrevista) {
-      statusTomado = 2;
+    if (horaPrevista) {
+      const [horaStr, minutoStr] = horaPrevista.split(":");
+      const horarioPrevisto = new Date();
+      horarioPrevisto.setHours(Number(horaStr), Number(minutoStr), 0, 0);
+
+      const diffMinutos =
+        (agora.getTime() - horarioPrevisto.getTime()) / 1000 / 60;
+      if (diffMinutos > 15) {
+        statusTomado = 2; // atraso
+      }
     }
 
     try {

@@ -30,9 +30,9 @@ export function RegistroItem({
 }: Readonly<RegistroItemProps>) {
   // Mapeia status para label e cor
   const statusMap = {
-    0: { label: "Não tomou", color: "text-red-500" },
-    1: { label: "Tomado", color: "text-green-500" },
-    2: { label: "Tomado com atraso", color: "text-yellow-500" },
+    0: { label: "Não tomou", color: "text-danger" },
+    1: { label: "Tomado", color: "text-fine" },
+    2: { label: "Tomado com atraso", color: "text-alert" },
   };
 
   const { label: statusLabel, color: statusColor } = statusMap[registro.tomado];

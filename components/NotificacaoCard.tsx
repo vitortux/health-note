@@ -30,20 +30,20 @@ export default function NotificacaoCard({
   let labelColor, labelText;
   switch (status) {
     case "tomado":
-      labelColor = "bg-green-500";
+      labelColor = "bg-fine";
       labelText = "TOMADO";
       break;
     case "atrasado":
-      labelColor = "bg-red-500";
+      labelColor = "bg-danger";
       labelText = "ATRASADO";
       break;
     default:
-      labelColor = "bg-sky-500";
+      labelColor = "bg-primary";
       labelText = "PENDENTE";
   }
 
   const isTomado = status === "tomado";
-  const buttonColor = isTomado ? "bg-gray-400" : "bg-sky-500";
+  const buttonColor = isTomado ? "bg-gray-400" : "bg-primary";
 
   return (
     <View className="flex-row justify-between items-center py-6 px-4 rounded-3xl mb-4 bg-card">
